@@ -1,4 +1,0 @@
-duo
-===
-
-duo project
