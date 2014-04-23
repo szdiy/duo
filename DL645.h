@@ -74,6 +74,8 @@ static void DL645_write_data(dl645_port_t, dl645_frame_t*) always_inline;       
 static void DL645_prepare_trans(dl645_port_t) always_inline;
 static void DL645_is_valid_frame(dl645_frame_t*) always_inline;
 static void DL645_drop_frame(dl645_frame_t*) always_inline;
+static int DL645_write_frame(dl645_port_t, dl645_frame_t*) always_inline;
+static char* DL645_serialize_frame(dl645_frame_t*) always_inline;
                                               
 static void DL645_get_addr(dl645_port_t port, dl645_frame_t* frame)
 {
@@ -114,11 +116,13 @@ static void DL645_get_cs(dl645_port_t port, dl645_frame_t* frame)
   frame->cs = __read_byte(port);
 }
 
-static void DL645_prepare_trans(dl645_port_t port)
+static int DL645_prepare_trans(dl645_port_t port)
 {
   int i = 4;
   while(i-- > 0)
     __write_byte(port, DL645_TR_PREFIX);
+
+  return 0;
 }
 
 static void DL645_is_valid_frame(dl645_frame_t* frame)
@@ -153,6 +157,34 @@ static dl645_frame_t DL645_read_frame(dl645_port_t port)
   // CS check failed, drop this frame and return NULL
   DL645_drop_frame(frame);
   return NULL;
+}
+
+static char* DL645_serialize_frame(dl645_frame_t* frame)
+{
+  // TODO: serialization of frame
+  // Need to follow the datasheet
+}
+
+static int DL645_write_frame(dl645_port_t port, dl645_frame_t* frame)
+{
+  char* raw = DL645_serialize_frame(frame);
+  int times = 5;
+  int ret = 0;
+  
+  while(!DL645_prepare_trans(port))
+    {
+      if (!time--)
+        {
+          ret = 1;
+          goto failed;
+        }
+    }
+
+  __write_bytes(port, raw, strlen(raw));
+
+ failed:
+  free(raw);
+  return ret;
 }
 
 #endif // End of __DUO_DL645_H__
