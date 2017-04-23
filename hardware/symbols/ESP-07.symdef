@@ -1,0 +1,35 @@
+[labels]
+ESP-07
+refdes=U?
+! copryright=2015 Atommann
+! author=Atommann
+! uselicense=unlimited
+! distlicense=GPL
+! device=ESP-07
+! footprint=ESP-07-16P
+
+[left]
+
+1 REST
+2 ADC
+3 CH_PD
+4 GPIO16
+5 GPIO14
+6 GPIO12
+7 GPIO13
+8 VCC
+
+[right]
+
+16 TXD
+15 RXD
+14 GPIO5
+13 GPIO4
+12 GPIO0
+11 GPIO2
+10 GPIO15
+9 GND
+
+[top]
+
+[bottom]

@@ -1,0 +1,23 @@
+[labels]
+LH15-10B12
+refdes=PS?
+! copryright=2014 Atommann
+! author=Atommann
+! uselicense=unlimited
+! distlicense=GPL
+! device=LH15-10B12
+! footprint=LH15-10B12
+
+[left]
+
+1 AC(N)
+2 AC(L)
+
+[right]
+
+4 Vo-
+3 Vo+
+
+[top]
+
+[bottom]

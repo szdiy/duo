@@ -1,0 +1,196 @@
+#!/usr/bin/perl
+
+# Copyright (C) 2007 John C. Luciani Jr.
+
+# This program may be distributed or modified under the terms of
+# version 0.2 of the No-Fee Software License published by
+# John C. Luciani Jr.
+
+# Creates the PCB elements for Molex 8624 header connectors
+
+use strict;
+use warnings;
+
+use Pcb_9;
+
+my $Pcb = Pcb_9 -> new(debug => 0);
+
+my @Fields = qw(circuits body_length pin_row_length);
+
+my @Def; # definitions that are common to all components
+
+while (<DATA>) {
+    s/\#.*//; # Remove comments
+    s/^\s*//; # Remove leading spaces
+    s/\s*$//; # Revove trailing spaces
+    next unless length; # Skip empty lines
+
+    # Lines that contain an '=' are global definitions.
+
+    push(@Def, $1, $2), next if /(\S+)\s*=\s*(\S.*)/;
+
+    my @values = split /\s*\|\s*/;
+
+    # hash for each footprint
+
+    my %f = ( @Def,
+	      map { $_ => shift(@values) } @Fields);
+
+    $Pcb -> element_begin(description => 'sparkcore',
+			  output_file => 
+                            "./" . &package_name($f{circuits}, $f{pin_rows}),
+			  dim   => 'mils',
+			  pin_one_square => 1);
+
+    my $pin_num = 1;
+    my $pins_per_row = $f{circuits} / 2;
+
+    # lower left corner is pin one
+
+    my $x0 = -$f{pin_spacing} * ($pins_per_row - 1) / 2;
+    my $y0 =  $f{row_spacing} / 2;
+
+    my $x = $x0;
+    my $y = $y0;
+
+    # These header connectors consist of two rows of pins.  With pin
+    # one in the lower left corner we will place pins from left to
+    # right until half the pins are placed. At the halfway point we
+    # will shift to the top row and place pins from right to left.
+
+    while ($pin_num <= $f{circuits}) {
+	$Pcb -> element_add_pin(x => $x, y => $y,
+				thickness  => $f{pad_thickness},
+				drill_hole => $f{drill_hole},
+				mask       => 10,
+				clearance  => 10,
+				pin_number => $pin_num);
+
+	# Header connectors usually have pins numbered from left to
+	# right with odd numbers on the bottom and even numbers on the
+	# top. Since this example program could be used for connectors
+	# other than headers three pin-numbering options are provided.
+
+	# header - two rows of pins. numbers increase from left to right.
+	#          odd numbered pins on the bottom, even on the top.
+
+        # dip    - two rows of pins. starting in the lower left corner
+        #          numbers increase left to right along the bottom row
+	#          and right to left along the top row.
+
+	# power  - two rows of pins. numbers increase from left to right
+        #          starting on the bottom row and then continue left to right
+        #          along the top row.
+
+	if ($f{pin_numbering_scheme} eq 'header') {
+	    $y *= -1;
+	    $x += $f{pin_spacing} if $y > 0;
+	} elsif ($f{pin_numbering_scheme} eq 'dip') {
+	    if ($pin_num == $pins_per_row) {
+		$y -= $f{row_spacing};
+	    } else {
+		$x += $pin_num > $pins_per_row 
+		    ? -$f{pin_spacing}
+		    : $f{pin_spacing};
+	    }
+	} elsif ($f{pin_numbering_scheme} eq 'power') {
+	    if ($pin_num == $pins_per_row) {
+		$y -= $f{row_spacing};
+		$x = $x0;
+	    } else {
+		$x += $f{pin_spacing}
+	    }
+	} else {
+	    die "unknown pin numbering scheme |$f{pin_numbering_scheme}|";
+	}
+	$pin_num++;
+    }
+
+    # bottom line
+    $Pcb -> element_add_line(x1 => -700, y1 => $f{body_width} / 2,
+                 x2 => 600, y2 => $f{body_width} / 2,
+                 thickness => 10);
+
+    # bottom rectangle
+    $Pcb -> element_add_rectangle(width => 100,
+                  length=> 1200,
+                  x => 0,
+                  y => 350);
+
+    # right bottom 45 degree
+    $Pcb -> element_add_line(x1 => 600, y1 => $f{body_width} / 2,
+                 x2 => 700, y2 => $f{body_width} / 2 - 100,
+                 thickness => 10);
+
+    # top line
+    $Pcb -> element_add_line(x1 => -700, y1 => -($f{body_width} / 2),
+                 x2 => 600, y2 => -($f{body_width} / 2),
+                 thickness => 10);
+
+    # top rectangle
+    $Pcb -> element_add_rectangle(width => 100,
+                  length=> 1200,
+                  x => 0,
+                  y => -350);
+
+    # right top 45 degree
+    $Pcb -> element_add_line(x1 => 600, y1 => -($f{body_width} / 2),
+                 x2 => 700, y2 => -($f{body_width} / 2) + 100,
+                 thickness => 10);
+
+    # right short line
+    $Pcb -> element_add_line(x1 => 700, y1 => $f{body_width} / 2 - 100,
+                 x2 => 700, y2 => -($f{body_width} / 2) + 100,
+                 thickness => 10);
+
+    # left bottom, short
+    $Pcb -> element_add_line(x1 => -700, y1 => $f{body_width} / 2,
+                 x2 => -700, y2 => ($f{body_width} / 2) - 250,
+                 thickness => 10);
+
+    # left top, short
+    $Pcb -> element_add_line(x1 => -700, y1 => -($f{body_width} / 2),
+                 x2 => -700, y2 => -($f{body_width} / 2) + 250,
+                 thickness => 10);
+
+    # usb connector
+    $Pcb -> element_add_rectangle(width => 300,
+                  length=> 150,
+                  x => -675,
+                  y => 0);
+
+    $Pcb -> element_set_text_xy(x => -$f{body_length}/2,
+				y => -$f{body_width}/2 - 20);
+
+
+    $Pcb -> element_output();
+}
+
+sub package_name ($$) { 
+    my ($circuits, $rows) = @_;
+    sprintf("SparkCore");
+}
+
+__DATA__
+
+pad_thickness = 66
+drill_hole = 46
+pin_numbering_scheme = dip
+body_width = 800
+pin_spacing = 100
+row_spacing = 700
+pin_diameter = 35
+pin_rows = 2
+
+# These adjustments are chosen so that the extents of the silkscreen
+# body rectangle are at least as large as the connector body AND there
+# is at leat 10mils of space between the copper and the silkscreen.
+
+# For this simple example program the values are hardcoded.
+
+body_width_adj  = -4
+body_length_adj =  6
+
+# circuits | body_length | pin_row_length
+
+24 | 1400| 1100 

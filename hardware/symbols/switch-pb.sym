@@ -1,0 +1,33 @@
+v 20060123 1
+P 0 0 300 0 1 0 0
+{
+T 50 50 5 10 1 1 0 0 1
+pinnumber=1
+T 50 50 5 10 0 0 0 0 1
+pinseq=1
+}
+P 900 0 1200 0 1 0 1
+{
+T 1050 50 5 10 1 1 0 0 1
+pinnumber=2
+T 1050 50 5 10 0 0 0 0 1
+pinseq=2
+}
+L 400 100 800 100 3 0 0 0 -1 -1
+L 600 100 600 200 3 0 0 0 -1 -1
+V 400 0 25 3 0 0 0 -1 -1 0 -1 -1 -1 -1 -1
+V 800 0 25 3 0 0 0 -1 -1 0 -1 -1 -1 -1 -1
+L 300 0 375 0 3 0 0 0 -1 -1
+L 825 0 900 0 3 0 0 0 -1 -1
+T 500 250 8 10 1 1 0 0 1
+refdes=S?
+T 0 0 9 10 0 0 0 0 1
+author=DJ Delorie
+T 0 0 9 10 0 0 0 0 1
+copyright=2006 DJ Delorie
+T 0 0 9 10 0 0 0 0 1
+dist-license=GPL
+T 0 0 9 10 0 0 0 0 1
+use-license=unlimited
+T 0 0 9 10 0 0 0 0 1
+description=Pushbutton switch

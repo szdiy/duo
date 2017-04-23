@@ -1,0 +1,27 @@
+[labels]
+AP1509-50SG-13
+refdes=U?
+! copryright=2014 Atommann
+! author=Atommann
+! uselicense=unlimited
+! distlicense=GPL
+! device=AP1509-50SG-13
+! footprint=SO8
+
+[left]
+
+1 VIN
+2 OUTPUT
+3 FB
+4 SD
+
+[right]
+
+8 GND
+7 GND
+6 GND
+5 GND
+
+[top]
+
+[bottom]
