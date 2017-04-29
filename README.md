@@ -7,7 +7,7 @@ This is the first and a Django imlementation of the server side for the SZDIY **
 ##How To
 
 ### Get Token
-
+```python
 import requests
 
 def get_token():
@@ -18,9 +18,10 @@ def get_token():
 		}
     r = requests.post(url, data=data)
 	return r.json()['token']
+```
 
 ### Post data
-
+```python
 def Post_data(token):
 	url = "http://10.211.55.12:8000/device/"
 	data = {
@@ -31,8 +32,10 @@ def Post_data(token):
     header = {"Authorization": "Token {}".format(token)}
 	r = requests.post(url, data=data, headers=header)
 	print r.content
+```
 
 ### Put them together
 
+```python
 Post_data(get_token())
-
+```
