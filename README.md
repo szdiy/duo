@@ -16,7 +16,7 @@ def get_token():
 		"username": 'root',
 		"password": "test1234",
 		}
-    r = requests.post(url, data=data)
+	r = requests.post(url, data=data)
 	return r.json()['token']
 ```
 
@@ -29,7 +29,7 @@ def Post_data(token):
 		"total": 4567890,
 		"time": 672384956,
 		}
-    header = {"Authorization": "Token {}".format(token)}
+	header = {"Authorization": "Token {}".format(token)}
 	r = requests.post(url, data=data, headers=header)
 	print r.content
 ```
