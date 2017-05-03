@@ -1,4 +1,4 @@
 PROGRAM=duo
 EXTRA_COMPONENTS = extras/mbedtls
 
-include ../../common.mk
+include $(ESP_OPEN_RTOS)/common.mk

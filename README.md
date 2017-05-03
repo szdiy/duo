@@ -14,6 +14,8 @@ ESP8266 with a RS-485 Transceiver.
 
 ## Firmware
 
+The firmware is powered by esp-open-rtos, before building set the enviornment variable 'ESP_OPEN_RTOS' to the absolute path of the esp-open-rtos directory.
+
 Need to implement the DL/T645-2007 protocol.
 
 ## Firmware Over-The-Air (FOTA)
