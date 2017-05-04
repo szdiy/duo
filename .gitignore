@@ -1,0 +1,11 @@
+# gEDA
+
+*.bak*
+*.pcb-
+*.fp-
+*.net
+*.cmd
+*.new.pcb
+#*.sch#
+*.sym~
+*.sch~

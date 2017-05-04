@@ -10,7 +10,9 @@ duo is the Pinyin of the Chinese character 度(read as duó), which means "to es
 
 ## Hardware
 
-ESP8266 with a RS-485 Transceiver.
+The present hardware is designed with gEDA (http://www.geda-project.org/).
+
+The configuration is an ESP8266 with a RS-485 Transceiver.
 
 ## Firmware
 
