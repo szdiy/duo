@@ -7,3 +7,6 @@ dht22:
 
 esp:
 	./djboxsym ESP-07.symdef > ESP-07.sym
+
+acdc:
+	./djboxsym LD03-10B05.symdef > LD03-10B05.sym
