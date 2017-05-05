@@ -60,6 +60,19 @@ REST_FRAMEWORK = {
     ]
 }
 
+# In some circumstances the password you should use to connect redis is not URL-safe, in this case you can escape it or just use the convenience option in OPTIONS dict:
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://10.211.55.12:6379/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD":"ZuPEFJCwKxJ7nHG",
+            "IGNORE_EXCEPTIONS": True, 
+        }
+    }
+}
+
 
 ROOT_URLCONF = 'szdiy.urls'
 
