@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 #---------------------------------------------------------------------------------------------
 # read_dlt645 v01 -- a tool to test dlt645 meter through IR reader
 # BSD license is applied to this code
@@ -114,6 +116,8 @@ def dlt645_get_addr(serial):
     try:
         #cmd2 = '\xfe\xfe\xfe\xfe\x68\xaa\xaa\xaa\xaa\xaa\xaa\x68\x13\x00\xdf\x16'
         cmd2 = '\xfe\xfe\xfe\xfe' + encode_dlt645('\xaa\xaa\xaa\xaa\xaa\xaa',0x13,0,'')
+        # Control Code 0x13 = read address
+        # 0: There is no following data in this frame
 
         serial.write(cmd2)
         time.sleep(0.5)
@@ -133,7 +137,7 @@ def dlt645_get_addr(serial):
         
         resp1 = dlt_645_rm_fe(resp)
 
-        #print 'resp1:',resp1
+        #print 'resp1:',resp1.encode('hex')
 
         ret,addr,data,ctl = decode_dlt645(resp1)
         if ret == 0:
@@ -201,6 +205,56 @@ def dlt645_read_data(serial,addr,data_tag):
         return -1,0
 
 #-------------------------
+# dlt645_read_time
+# The time is coded with 3 bytes
+#-------------------------    
+def dlt645_read_time(serial,addr,data_tag):
+    #print 'dlt645_read_time ...'
+    try:
+        cmd2 = '\xfe\xfe\xfe\xfe' + encode_dlt645(addr,0x11,4,data_tag)
+        serial.write(cmd2)
+        time.sleep(0.5)
+        resp = ''
+        c = ''
+        i = 0
+        while c != '\x16' and i < SERIAL_TIMEOUT_CNT:
+            c = serial.read(1)
+            if len(c) > 0:
+                resp += c
+            else:
+                print '.'
+                i += 1
+            
+        if i >= SERIAL_TIMEOUT_CNT:
+            return -1,0
+            
+        resp1 = dlt_645_rm_fe(resp)    
+        ret,addr,data,ctl = decode_dlt645(resp1)
+        #atommann
+        print data.encode('hex')
+        if ret == 0 and len(data) >= 8:
+            i = ord(data[7])/16 *10000000
+            i += ord(data[7])%16 *1000000
+
+            i += ord(data[6])/16  *100000
+            i += ord(data[6])%16   *10000
+            
+            i += ord(data[5])/16    *1000
+            i += ord(data[5])%16     *100
+
+            i += ord(data[4])/16      *10
+            i += ord(data[4])%16
+     
+            return ret,i
+        else:
+            return -1,0
+    except:
+        print 'dlt645_read_data exception!'
+        return -1,0
+
+
+
+#-------------------------
 # read_dlt645_once
 #-------------------------       
 def read_dlt645_once(serial_port,baud_rate):
@@ -254,7 +308,7 @@ def read_dlt645_once(serial_port,baud_rate):
 # main
 #-------------------------
 if __name__ == '__main__':
-    ret,f1,f2,f3 = read_dlt645_once('/dev/ttyUSB1',1200)
+    ret,f1,f2,f3 = read_dlt645_once('/dev/ttyUSB0',2400)
     print ret,f1,f2,f3
 
     try:
@@ -302,19 +356,10 @@ if __name__ == '__main__':
             print 'total kWh:',data/100.0
         else:
             print 'read error!'
-            
-        retcode,data = dlt645_read_data(s,addr,'\x00\x01\x00\x00')
+
+        # read time    
+        retcode,data = dlt645_read_time(s,addr,'\x04\x00\x01\x02')
         #print retcode,data
-        if retcode == 0:
-            print 'ping kWh:',data/100.0
-        else:
-            print 'read error!'
-        retcode,data = dlt645_read_data(s,addr,'\x00\x02\x00\x00')
-        #print retcode,data
-        if retcode == 0:
-            print 'gu kWh:',data/100.0
-        else:
-            print 'read error!'
 
         time.sleep(5)
 
