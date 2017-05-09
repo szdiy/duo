@@ -77,6 +77,11 @@ def decode_dlt645(data):
         
     return 0, data[1:7],d_out,ord(data[8])
 
+# atommann
+# data[1:7] : is the address
+# d_out     : the data we want
+# data[8]   : control code
+
 #-------------------------
 # encode_dlt645
 #------------------------- 
@@ -184,6 +189,7 @@ def dlt645_read_data(serial,addr,data_tag):
         resp1 = dlt_645_rm_fe(resp)    
         ret,addr,data,ctl = decode_dlt645(resp1)
         #print data.encode('hex')
+        # BCD to decimal
         if ret == 0 and len(data) >= 8:
             i = ord(data[7])/16 *10000000
             i += ord(data[7])%16 *1000000
@@ -206,7 +212,7 @@ def dlt645_read_data(serial,addr,data_tag):
 
 #-------------------------
 # dlt645_read_time
-# The time is coded with 3 bytes
+# The time is coded in 3 bytes
 #-------------------------    
 def dlt645_read_time(serial,addr,data_tag):
     #print 'dlt645_read_time ...'
@@ -230,12 +236,9 @@ def dlt645_read_time(serial,addr,data_tag):
             
         resp1 = dlt_645_rm_fe(resp)    
         ret,addr,data,ctl = decode_dlt645(resp1)
-        #atommann
-        print data.encode('hex')
-        if ret == 0 and len(data) >= 8:
-            i = ord(data[7])/16 *10000000
-            i += ord(data[7])%16 *1000000
-
+        #print data.encode('hex')
+        # need to convert to Unix time stamp
+        if ret == 0 and len(data) >= 7:
             i += ord(data[6])/16  *100000
             i += ord(data[6])%16   *10000
             

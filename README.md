@@ -18,7 +18,7 @@ The configuration is an ESP8266 with a RS-485 Transceiver.
 
 The firmware is powered by esp-open-rtos, before building set the enviornment variable 'ESP_OPEN_RTOS' to the absolute path of the esp-open-rtos directory.
 
-Need to implement the DL/T645-2007 protocol.
+The electricity meter supports the DL/T645-2007 protocol. But we only need to read some interesting data such as the total kWh data.
 
 ## Firmware Over-The-Air (FOTA)
 
