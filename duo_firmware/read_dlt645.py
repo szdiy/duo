@@ -23,6 +23,7 @@
 #---------------------------------------------------------------------------------------------
 import serial
 import sys,time
+import httplib
 
 SERIAL_TIMEOUT_CNT = 10
 #-------------------------
@@ -212,7 +213,8 @@ def dlt645_read_data(serial,addr,data_tag):
 
 #-------------------------
 # dlt645_read_time
-# The time is coded in 3 bytes
+#
+# The time is encoded in 3 bytes (BCD)
 #-------------------------    
 def dlt645_read_time(serial,addr,data_tag):
     #print 'dlt645_read_time ...'
@@ -311,8 +313,8 @@ def read_dlt645_once(serial_port,baud_rate):
 # main
 #-------------------------
 if __name__ == '__main__':
-    ret,f1,f2,f3 = read_dlt645_once('/dev/ttyUSB0',2400)
-    print ret,f1,f2,f3
+    #ret,f1,f2,f3 = read_dlt645_once('/dev/ttyUSB0',2400)
+    #print ret,f1,f2,f3
 
     try:
         serialport_baud = int(sys.argv[1])
@@ -320,51 +322,64 @@ if __name__ == '__main__':
         s = serial.Serial(serialport_path,serialport_baud,parity=serial.PARITY_EVEN,timeout=0.1)
         #print s
         
-        # test encode_dlt645
-        s1 = encode_dlt645('\xaa\xaa\xaa\xaa\xaa\xaa',0x13,0,'')
-        if s1 == '\x68\xaa\xaa\xaa\xaa\xaa\xaa\x68\x13\x00\xdf\x16':
-            print 'encode_dlt645 passed'
-        else:
-            print 'encode_dlt645 failed'
-            
-        # test decode_dlt645
-        s1 = '\xfe\xfe\xfe\xfe\x68\x69\x40\x17\x10\x12\x00\x68\x93\x06\x9c\x73\x4a\x43\x45\x33\x5f\x16'
-        s2 = dlt_645_rm_fe(s1)
-        
-        retcode,addr,data,ctl = decode_dlt645(s2)
-        if retcode == 0 and addr == '\x69\x40\x17\x10\x12\x00' and data == '\x69\x40\x17\x10\x12\x00' and ctl == 0x93:
-            print 'decode_dlt645 passed'
-        else:
-            print 'decode_dlt645 failed'
-    
     except:
         print 'init serial error!'
         sys.exit(-1)
     
     
     # get meter data, unit : 0.01 kWh
-    while True:
-        # get meter addr
-        retcode,addr = dlt645_get_addr(s)
-        #print retcode,addr
-        if retcode < 0:
-            print 'get addr error'
-            time.sleep(5)
-            continue
+    # get meter addr
+    retcode,addr = dlt645_get_addr(s)
+    #print retcode,addr
+    if retcode < 0:
+        print 'get addr error'
             
-        print '-----------------------------------'
-        retcode,data = dlt645_read_data(s,addr,'\x00\x00\x00\x00')
-        #print retcode,data
-        if retcode == 0:
-            print 'total kWh:',data/100.0
-        else:
-            print 'read error!'
+    print '-----------------------------------'
+    retcode,data = dlt645_read_data(s,addr,'\x00\x00\x00\x00')
+    #print retcode,data
+    if retcode == 0:
+        total_kwh = data/100.0
+        print 'total kWh:',total_kwh
+    else:
+        print 'read error!'
 
-        # read time    
-        retcode,data = dlt645_read_time(s,addr,'\x04\x00\x01\x02')
-        #print retcode,data
+    # read date
+    retcode,data = dlt645_read_data(s,addr,'\x01\x01\x00\x04')
+    #print retcode,data
+    if retcode == 0:
+        #print 'Date:',data
+        date_str = str(data)
+        time_str = '20' + date_str[0:2] + '-' + date_str[2:4] + '-' + date_str[4:6] + ' '
+    else:
+        print 'read error!'
 
-        time.sleep(5)
 
-    
+    # read time    
+    retcode,data = dlt645_read_time(s,addr,'\x02\x01\x00\x04')
     s.close()
+    #print retcode,data
+    if retcode == 0:
+        #print 'Time:',data
+        meter_time_str = str(data)
+        time_str = time_str + meter_time_str[0:2] + ':' + meter_time_str[2:4] + ':' + meter_time_str[4:6]
+    else:
+        print 'read error!'
+
+    #print time_str
+
+    time_stamp = time.mktime(time.strptime(time_str, '%Y-%m-%d %H:%M:%S'))
+    print time_stamp
+
+    # The API format
+    #https://api.szdiy.org/duo/upload?node=<node_id>&total=&time=
+
+    #web_url = "https://api.szdiy.org/duo/";
+    web_url = "https://api.szdiy.org/duo/upload?node=001&total=" + str(total_kwh) + "&time=" + str(time_stamp)
+    print web_url
+    c = httplib.HTTPSConnection("szdiy.org")
+    c.request("GET", web_url)
+    response = c.getresponse()
+    print response.status, response.reason
+    data = response.read()
+    print data
+
