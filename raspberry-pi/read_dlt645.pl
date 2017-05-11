@@ -14,18 +14,42 @@ sub decode_dlt645 {
 
 }
 
-
-#
 # encode dlt645
 #
+# The format of the frame
+# cmd2 = "\xfe\xfe\xfe\xfe" . encode_dlt645("\xaa\xaa\xaa\xaa\xaa\xaa", 0x13, 0, "")
 sub encode_dlt645 {
+    # Get passed arguments
+    my ($addr, $ctl, $lens, $data_tag) = @_;
 
+    my $data_tag_2 = "";
+    # my $lens_data = length($data_tag);
+    foreach $byte (split //, $data_tag) {
+        $data_tag_2 .= chr((ord($byte) + 0x33));
+    }
+
+    my $s1 = "\x68" . $addr . "\x68" . chr($ctl) . chr($lens) . $data_tag_2;
+
+    # calculate checksum
+    my $cs = 0;
+    foreach $byte (split //, $s1) {
+        $cs += (ord($byte));
+    }
+    $cs = $cs % 256;
+    $s1 = $s1 . chr($cs);
+    # add tail
+    $s1 = $s1 . "\x16";
+
+    return $s1;
 }
+
 
 #
 # get the address
 #
 sub dlt645_get_addr {
+
+    my $cmd2 = "\xfe\xfe\xfe\xfe" . encode_dlt645("\xaa\xaa\xaa\xaa\xaa\xaa", 0x13, 0, '');
 
 }
 
