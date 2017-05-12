@@ -11,8 +11,69 @@ use LWP::UserAgent;
 # decode the frame
 #
 sub decode_dlt645 {
+    # get passed arguments
+    my ($data) = @_;
+    my @data_array = split (//, $data);
 
+
+    if(ord(@data_array[0]) != 0x68) {
+        print "decode_dlt645 fails 1";
+        return -1, "","","";
+    }
+    if(ord(@data_array[7]) != 0x68) {
+        print "decode_dlt645 fails 2";
+        return -1, "","","";
+    }
+    
+    my $len_1 = length($data);
+    if ($len_1 < 12) {
+        print "decode_dlt645 fail 3";
+        return -1, "","","";
+    }
+
+    my $len_2 = ord(@data_array[9]) + 12;
+    if ($len_1 != $len_2) {
+        print "decode_dlt645 fail 4";
+        return -1, "","","";
+    }
+
+    # check tail 0x16
+    if (ord(@data_array[$len_2 - 1]) != 0x16) {
+        print "decode_dlt645 fail 5";
+        return -1, "","","";
+    }
+
+    # check checksum
+    my $cs = 0;
+    for (my $i = 0; $i < ($len_2 - 2); $i++) {
+        $cs += ord(@data_array[$i]);
+    }
+
+    $cs = $cs % 256;
+    #printf "%x", $cs;
+    if ($cs != ord(@data_array[$len_2 -2])) {
+        print "decode_dlt645 fail 6";
+        return -1, "","","";
+    }
+
+    my $d_out = "";
+    # extract data (sub 0x33)
+    if (ord(@data_array[9]) > 0) {
+        for (my $i = 10; $i < (10 + ord(@data_array[9])); $i++) {
+            #print $i, "\n";
+            #printf "%x\n", ord(@data_array[$i]);
+            $d_out .= chr(ord(@data_array[$i]) - 0x33);
+        }
+    } else {
+        $d_out = "";
+    }
+
+    my $addr = substr($data, 1, 6);
+
+    # seq: retcode, addr, data, ctl
+    return (0, $addr, $d_out, ord(@data_array[8]));
 }
+
 
 # encode dlt645
 #
