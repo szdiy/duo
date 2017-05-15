@@ -1,23 +1,41 @@
-# Project duo
+# Project duo - Server Side (Django version)
 
-The goal of this project is to read the data from the electricity meter in SZDIY Hackspace and send the data to a server, so we can know how much energy we use every day.
+This is the first and a Django imlementation of the server side for the SZDIY **duo** project.
 
-At beginning we should just read the kilowatt hour [kWh] data. As the projects growing, we should also read other data as well.
 
-## The Name
 
-duo is the Pinyin of the Chinese character 度(read as duó), which means "to estimate", this character has another pronunciation which is dù, it is the unit of electricity in Chinese. So we choose it as the project name.
+##How To
 
-## Hardware
+### Get Token
+```python
+import requests
 
-ESP8266 with a RS-485 Transceiver.
+def get_token():
+	url = "http://10.211.55.12:8000/api-token-auth/"
+	data = {
+		"username": 'root',
+		"password": "test1234",
+		}
+	r = requests.post(url, data=data)
+	return r.json()['token']
+```
 
-## Firmware
+### Post data
+```python
+def Post_data(token):
+	url = "http://10.211.55.12:8000/device/"
+	data = {
+		"node_id": 7654321345,
+		"total": 4567890,
+		"time": 672384956,
+		}
+	header = {"Authorization": "Token {}".format(token)}
+	r = requests.post(url, data=data, headers=header)
+	print r.content
+```
 
-Need to implement the DL/T645-2007 protocol.
+### Put them together
 
-## Firmware Over-The-Air (FOTA)
-
-It will be very convenient to have this function. The developers can sit at home and upgrade/debug/play with the firmware.
-
-## Server Side
+```python
+Post_data(get_token())
+```
