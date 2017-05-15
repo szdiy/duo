@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Remember to create the file szdiy/local_settings.py for the uwsgi server"
-echo "Usage: ./start_server.sh <python_home>\n"
+echo -e "Usage: ./start_server.sh <python_home>\n"
 
 if [ $# -eq 0 ] 
 then
@@ -17,13 +17,13 @@ echo "PYTHON_HOME=${PYTHON_HOME}"
 #uwsgi --http :12001 --module szdiy.wsgi
 
 # Uncomment below for unix socket
-uwsgi \
+$PYTHON_HOME/bin/uwsgi \
     --vacuum \
     --master --pidfile=.pid_duo \
     --http :12001 \
     --socket szdiy-duo.sock \
     --module szdiy.wsgi -H $PYTHON_HOME \
-    --daemonize=dev.log
+    --daemonize=dev.log && echo "uwsgi started"
 
 
 
