@@ -1,7 +1,11 @@
 #!/bin/bash
 
 echo "Remember to create the file szdiy/local_settings.py for the uwsgi server"
-echo -e "Usage: ./start_server.sh <python_home>\n"
+echo "Create settings:"
+echo "$ ln -s szdiy/settings.py szdiy/local_settings.py"
+echo ""
+echo "Start server:"
+echo -e "$ ./start_server.sh <python_home>\n"
 
 if [ $# -eq 0 ] 
 then
