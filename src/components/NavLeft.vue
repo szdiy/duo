@@ -1,10 +1,21 @@
 <template>
-	<div class="nav-left">
-		<ul class="nav nav-sidebar">
-		  <li class="active"><a href="#">Overview <span class="sr-only">(current)</span></a></li>
-		  <li><a href="#">Reports</a></li>
-		  <li><a href="#">Analytics</a></li>
-		  <li><a href="#">Export</a></li>
-		</ul>
-	</div>
+  <div class="nav-left" id="nav-left">
+    <ul class="nav nav-sidebar">
+      <li v-for="r of routes" :name="r.name"><a :href="'#'+r.path">{{r.name}}</a></li>
+    </ul>
+  </div>
 </template>
+
+<script>
+import router from '../router'
+
+export default {
+  name: 'navleft',
+  data () {
+    return {
+      routes: router.options.routes,
+      cur: location.hash.replace('#', '')
+    }
+  }
+}
+</script>
