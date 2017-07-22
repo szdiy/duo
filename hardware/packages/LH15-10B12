@@ -16,7 +16,7 @@ use Pcb_9;
 my $Pcb = Pcb_9 -> new(debug => 1);
 
 $Pcb -> element_begin(description => 'AC DC converter',
-              output_file => './LH15-10B12',
+              output_file => './LH15-10B12-1.fp',
               dim   => 'mils');
 
 # the resistor centroid is at (0,0) and the pins are placed 400 mils
