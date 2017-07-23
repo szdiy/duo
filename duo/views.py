@@ -58,8 +58,6 @@ class device_list(generics.ListCreateAPIView):
             # print(serializer.data)
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True)
-        print("serializer is ", serializer)
-        print("data is ", serializer.data)
         # data = [{"total": float(cache.get(i).split(',')[0]), "node_id":int(
         #     cache.get(i).split(',')[1]), "time":int(i)} for i in cache.keys('*')]
         # print(data)
