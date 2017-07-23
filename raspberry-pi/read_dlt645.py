@@ -38,12 +38,14 @@ def decode_dlt645(data):
         print 'decode_dlt645 fail 2'
         return -1,'','',''
     
-    # check len
+    # check length
     len_1 = len(data)
+    # there are at lease 12 bytes of data
     if  len_1 < 12:
         print 'decode_dlt645 fail 3'
         return -1,'','',''
     
+    # lent_2 is the total length
     len_2 = ord(data[9]) + 12
     if len_1 != len_2:
         print 'decode_dlt645 fail 4'    
@@ -241,7 +243,7 @@ def dlt645_read_time(serial,addr,data_tag):
         #print data.encode('hex')
         # need to convert to Unix time stamp
         if ret == 0 and len(data) >= 7:
-            i += ord(data[6])/16  *100000
+            i = ord(data[6])/16   *100000
             i += ord(data[6])%16   *10000
             
             i += ord(data[5])/16    *1000
