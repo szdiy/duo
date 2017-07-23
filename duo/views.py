@@ -29,7 +29,7 @@ class device_list(generics.ListCreateAPIView):
             total = request.POST.get('total', None)
             archive_date = datetime.date.fromtimestamp(float(time))
             node = node_query[0]
-            archive_query = node.power_archive.filter(date=archive_date)
+            archive_query = node.node.filter(date=archive_date)
             archive = archive_query[0] if archive_query.exists(
             ) else NodePowerArchive(node=node, date=archive_date)
             power_list = archive.power_list()
@@ -100,7 +100,7 @@ def upload_reading(request):
     archive_date = datetime.date.fromtimestamp(float(time))
 
     # 保存读数到该天的archive记录
-    archive_query = node.power_archive.filter(date=archive_date)
+    archive_query = node.node.filter(date=archive_date)
     archive = archive_query[0] if archive_query.exists(
     ) else NodePowerArchive(node=node, date=archive_date)
     power_list = archive.power_list()
