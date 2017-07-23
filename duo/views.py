@@ -37,7 +37,7 @@ class device_list(generics.ListCreateAPIView):
             print("power list is ", power_list)
             archive.to_power_list(power_list)
             archive.save()
-            data = {"power_archive": node_id, "archive_json": power_list}
+            data = {"node": node_id, "archive_json": power_list}
             # serializer = self.get_serializer(
             #     data={"power_archive": node_id, "archive_json": power_list})
             # serializer.is_valid(raise_exception=True)
@@ -50,6 +50,7 @@ class device_list(generics.ListCreateAPIView):
             return Response({"msg": "node_id not Found"}, status=status.HTTP_404_NOT_FOUND)
 
     def list(self, request, *args, **kwargs):
+        print(self.get_queryset())
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -57,6 +58,8 @@ class device_list(generics.ListCreateAPIView):
             # print(serializer.data)
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True)
+        print("serializer is ", serializer)
+        print("data is ", serializer.data)
         # data = [{"total": float(cache.get(i).split(',')[0]), "node_id":int(
         #     cache.get(i).split(',')[1]), "time":int(i)} for i in cache.keys('*')]
         # print(data)

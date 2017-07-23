@@ -18,7 +18,7 @@ class Node(models.Model):
 
 
 class NodePowerArchive(models.Model):
-    node = models.ForeignKey(Node, related_name="power_archive")
+    node = models.ForeignKey(Node, related_name='node', on_delete=models.CASCADE)
     archive_json = models.TextField(default="[]")
     date = models.DateField(auto_now=False, auto_now_add=False)
 
