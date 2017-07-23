@@ -39,3 +39,15 @@ def Post_data(token):
 ```python
 Post_data(get_token())
 ```
+
+### Get data
+
+```python
+get_data(token):
+	header = {"Authorization": "Token {}".format(token)}
+	r = requests.get(url, headers=header)
+	return r.json()
+
+get_data(get_token())
+
+```
