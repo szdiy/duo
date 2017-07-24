@@ -243,22 +243,26 @@ def dlt645_read_time(serial,addr,data_tag):
         #print data.encode('hex')
         # need to convert to Unix time stamp
         if ret == 0 and len(data) >= 7:
-            i = ord(data[6])/16   *100000
-            i += ord(data[6])%16   *10000
-            
-            i += ord(data[5])/16    *1000
-            i += ord(data[5])%16     *100
-
-            i += ord(data[4])/16      *10
-            i += ord(data[4])%16
-     
-            return ret,i
+            list1 =  list(bcd2digits(data[4:7]))
+            str1 = ''.join(str(e) for e in list1)
+            return ret,str1
         else:
             return -1,0
     except:
         print 'dlt645_read_data exception!'
         return -1,0
 
+
+#-------------------------
+# convert a BCD string to digits
+#-------------------------       
+def bcd2digits(chars):
+    for char in chars:
+        char = ord(char)
+        for val in ((char >> 4, char & 0xF)):
+            if val == 0xF:
+                return
+            yield val
 
 
 #-------------------------
@@ -357,20 +361,18 @@ if __name__ == '__main__':
 
 
     # read time    
-    retcode,data = dlt645_read_time(s,addr,'\x02\x01\x00\x04')
+    retcode,data_str = dlt645_read_time(s,addr,'\x02\x01\x00\x04')
     s.close()
-    #print retcode,data
+    #print retcode, data_str
     if retcode == 0:
-        #print 'Time:',data
-        meter_time_str = str(data)
-        time_str = time_str + meter_time_str[0:2] + ':' + meter_time_str[2:4] + ':' + meter_time_str[4:6]
+        time_str = time_str + data_str[4:6] + ':' + data_str[2:4] + ':' + data_str[0:2]
     else:
         print 'read error!'
 
     #print time_str
 
     time_stamp = time.mktime(time.strptime(time_str, '%Y-%m-%d %H:%M:%S'))
-    print time_stamp
+    #print time_stamp
 
     # The API format
     #https://api.szdiy.org/duo/upload?node=<node_id>&total=&time=
