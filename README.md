@@ -32,12 +32,9 @@ def Post_data(token):
     header = {"Authorization": "Token {}".format(token)}
     r = requests.post(url, data=data, headers=header)
     return r.content
-```
 
-### Put them together
-
-```python
 Post_data(get_token())
+
 ```
 
 ### Get data
