@@ -25,7 +25,7 @@ SECRET_KEY = '_i#f9t))#3-^9c$xl-s9ssbyp9n=62ex#&k+(#*q5yqms4v-sd'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.1.1.138']
+ALLOWED_HOSTS = ['10.1.1.138', 'localhost']
 
 
 # Application definition
@@ -68,7 +68,7 @@ CACHES = {
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "PASSWORD":"dr2613sdjxxYJAfwNHkUY6zXyul",
-            "IGNORE_EXCEPTIONS": True, 
+            "IGNORE_EXCEPTIONS": True,
         }
     }
 }

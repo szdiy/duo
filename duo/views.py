@@ -5,20 +5,25 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.core.cache import cache
 
-
 from .models import Node, NodePowerArchive
-from .serializers import NodeSerializer, NodeArchiveSerializer
+from .serializers import NodeSerializer, NodePowerArchiveSerializer
 from .permissions import IsAdminOrReadOnly
 
 import json
 import datetime
+import logging
 
 # Create your views here.
+logger = logging.getLogger(__name__)
 
+class DeviceList(generics.ListCreateAPIView):
+    queryset = Node.objects.all() # descending by time
+    serializer_class = NodeSerializer
+    permission_classes = (IsAdminOrReadOnly, )
 
-class device_list(generics.ListCreateAPIView):
-    queryset = NodePowerArchive.objects.all()  # descending by time
-    serializer_class = NodeArchiveSerializer
+class DevicePowerArchiveList(generics.ListCreateAPIView):
+    queryset = NodePowerArchive.objects.all() # descending by time
+    serializer_class = NodePowerArchiveSerializer
     permission_classes = (IsAdminOrReadOnly, )
 
     def create(self, request, *args, **kwargs):
@@ -49,6 +54,8 @@ class device_list(generics.ListCreateAPIView):
             return Response({"msg": "node_id not Found"}, status=status.HTTP_404_NOT_FOUND)
 
     def list(self, request, *args, **kwargs):
+
+
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
         if page is not None:
