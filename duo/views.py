@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.core.cache import cache
 
+
 from .models import Node, NodePowerArchive
 from .serializers import NodeSerializer, NodeArchiveSerializer
 from .permissions import IsAdminOrReadOnly
@@ -28,15 +29,14 @@ class device_list(generics.ListCreateAPIView):
             total = request.POST.get('total', None)
             archive_date = datetime.date.fromtimestamp(float(time))
             node = node_query[0]
-            archive_query = node.power_archive.filter(date=archive_date)
+            archive_query = node.node.filter(date=archive_date)
             archive = archive_query[0] if archive_query.exists(
             ) else NodePowerArchive(node=node, date=archive_date)
             power_list = archive.power_list()
             power_list.append(str({"total": total, "time": time}))
-            print("power list is ", power_list)
             archive.to_power_list(power_list)
             archive.save()
-            data = {"power_archive": node_id, "archive_json": power_list}
+            data = {"node": node_id, "archive_json": power_list}
             # serializer = self.get_serializer(
             #     data={"power_archive": node_id, "archive_json": power_list})
             # serializer.is_valid(raise_exception=True)
@@ -78,6 +78,7 @@ def upload_reading(request):
     """上传设备读数
 
     HTTP GET: http://api.szdiy.org/duo/upload?node=<node_id>&total=<reading>&time=<timestamp>
+
         node_id: 节点id
         total: 度数
         time: unix timestamp
@@ -97,7 +98,7 @@ def upload_reading(request):
     archive_date = datetime.date.fromtimestamp(float(time))
 
     # 保存读数到该天的archive记录
-    archive_query = node.power_archive.filter(date=archive_date)
+    archive_query = node.node.filter(date=archive_date)
     archive = archive_query[0] if archive_query.exists(
     ) else NodePowerArchive(node=node, date=archive_date)
     power_list = archive.power_list()
