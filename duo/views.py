@@ -16,25 +16,27 @@ import logging
 # Create your views here.
 logger = logging.getLogger(__name__)
 
+
 class DeviceList(generics.ListCreateAPIView):
-    queryset = Node.objects.all() # descending by time
+    queryset = Node.objects.all()  # descending by time
     serializer_class = NodeSerializer
     permission_classes = (IsAdminOrReadOnly, )
 
+
 class DevicePowerArchiveList(generics.ListCreateAPIView):
-    queryset = NodePowerArchive.objects.all() # descending by time
+    queryset = NodePowerArchive.objects.all()  # descending by time
     serializer_class = NodePowerArchiveSerializer
     permission_classes = (IsAdminOrReadOnly, )
 
     def create(self, request, *args, **kwargs):
         node_id = request.POST.get("node_id", None)
-        node_query, node_validator = self.node_id_validator()
+        node_query, node_validator = self.node_id_validator(node_id)
         if node_validator:
             time = request.POST.get("time", None)
             total = request.POST.get('total', None)
             archive_date = datetime.date.fromtimestamp(float(time))
             node = node_query[0]
-            archive_query = node.node.filter(date=archive_date)
+            archive_query = node.power_archive.filter(date=archive_date)
             archive = archive_query[0] if archive_query.exists(
             ) else NodePowerArchive(node=node, date=archive_date)
             power_list = archive.power_list()
@@ -48,29 +50,69 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
             # self.perform_create(serializer)
             # cache.set(serializer.data['time'], "{},{}".format(serializer.data[
             #           'total'], serializer.data['node_id']), timeout=60 * 60 * 24 * 7)
-            #headers = self.get_success_headers(serializer.data)
+            # headers = self.get_success_headers(serializer.data)
             return Response(data, status=status.HTTP_201_CREATED)
         else:
             return Response({"msg": "node_id not Found"}, status=status.HTTP_404_NOT_FOUND)
 
+    def get_queryset(self):
+
+        date_format = {
+            "24hours": [0, 1],
+            "48hours": [1, 2],
+            "7days": [0, 7],
+            "14days": [7, 14],
+            "1month": [0, 30],
+            "2months": [30, 60],
+        }
+
+        query_date = self.request.GET.get("date", None)
+
+        if query_date and query_date in date_format:
+            date_filter = {}
+            start_date = date_format[query_date][0]
+            end_date = date_format[query_date][1]
+            now = datetime.datetime.now()
+            start_time = now - datetime.timedelta(days=start_date)
+            end_time = now - datetime.timedelta(days=end_date)
+            date_filter['date__lte'] = start_time
+            date_filter['date__gt'] = end_time
+            queryset = self.queryset.filter(**date_filter)
+            # print(queryset)
+            return queryset
+            # data = [{"total": float(cache.get(i).split(',')[0]), "node_id":int(
+            #     cache.get(i).split(',')[1]), "time":int(i)} for i in cache.keys('*')]
+            # print(data)
+        else:
+            return False
+
     def list(self, request, *args, **kwargs):
 
-
+        node_id = request.GET.get("node_id", None)
+        node_query, node_validator = self.node_id_validator(node_id)
         queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            # print(serializer.data)
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(queryset, many=True)
-        # data = [{"total": float(cache.get(i).split(',')[0]), "node_id":int(
-        #     cache.get(i).split(',')[1]), "time":int(i)} for i in cache.keys('*')]
-        # print(data)
-        return Response(serializer.data)
 
-    def node_id_validator(self):
+        if queryset is not False:
+            if node_validator:
+                print("node_validator")
+                page = self.paginate_queryset(queryset)
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    # print(serializer.data)
+                    return self.get_paginated_response(serializer.data)
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+                # else:
+                # return Response({"msg": "invalid date format, please try again"},
+                # status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response({"msg": "node_id not Found"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({"msg": "dateformat error, please trye again"}, status=status.HTTP_404_NOT_FOUND)
+
+    def node_id_validator(self, node_id):
         queryset = Node.objects.all()
-        node_id = self.request.POST.get("node_id", None)
+        print(node_id)
         if node_id:
             queryset = queryset.filter(node_id=node_id)
             if queryset.exists():
