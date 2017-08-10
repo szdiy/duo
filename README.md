@@ -49,3 +49,19 @@ def get_data(token):
 get_data(get_token())
 
 ```
+
+### Generate past 70 days data for testing
+
+```python
+
+import datetime
+
+now = datetime.datetime.now()
+test_time = now - datetime.timedelta(days=start_date)
+
+for i in range(70):
+    test_time = (now - datetime.timedelta(days=i)).timestamp()
+    print(Post_data(start_time))
+
+
+```

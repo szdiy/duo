@@ -19,7 +19,8 @@ class Node(models.Model):
 
 # 电力的记录（如果节点有其他类型时可创建其他的记录模型
 class NodePowerArchive(models.Model):
-    node = models.ForeignKey(Node, related_name='power_archive', on_delete=models.CASCADE)
+    node = models.ForeignKey(
+        Node, related_name='power_archive', on_delete=models.CASCADE)
     archive_json = models.TextField(default="[]")
     date = models.DateField(auto_now=False, auto_now_add=False)
 
