@@ -10,7 +10,7 @@ from .serializers import NodeSerializer, NodePowerArchiveSerializer
 from .permissions import IsAdminOrReadOnly
 
 import json
-import datetime
+from django.utils.timezone import datetime, timedelta
 import logging
 
 # Create your views here.
@@ -44,13 +44,6 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
             archive.to_power_list(power_list)
             archive.save()
             data = {"node": node_id, "archive_json": power_list}
-            # serializer = self.get_serializer(
-            #     data={"power_archive": node_id, "archive_json": power_list})
-            # serializer.is_valid(raise_exception=True)
-            # self.perform_create(serializer)
-            # cache.set(serializer.data['time'], "{},{}".format(serializer.data[
-            #           'total'], serializer.data['node_id']), timeout=60 * 60 * 24 * 7)
-            # headers = self.get_success_headers(serializer.data)
             return Response(data, status=status.HTTP_201_CREATED)
         else:
             return Response({"msg": "node_id not Found"}, status=status.HTTP_404_NOT_FOUND)
@@ -59,36 +52,35 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
 
         date_format = {
             "24hours": [0, 1],
-            "48hours": [1, 2],
+            "48hours": [0, 2],
             "7days": [0, 7],
-            "14days": [7, 14],
+            "14days": [0, 14],
             "1month": [0, 30],
-            "2months": [30, 60],
+            "2months": [0, 60],
         }
 
-        query_date = self.request.GET.get("date", None)
+        query_date = self.request.GET.get("period", None)
 
-        if query_date and query_date in date_format:
-            date_filter = {}
-            start_date = date_format[query_date][0]
-            end_date = date_format[query_date][1]
-            now = datetime.datetime.now()
-            start_time = now - datetime.timedelta(days=start_date)
-            end_time = now - datetime.timedelta(days=end_date)
-            date_filter['date__lte'] = start_time
-            date_filter['date__gt'] = end_time
-            queryset = self.queryset.filter(**date_filter)
-            # print(queryset)
-            return queryset
-            # data = [{"total": float(cache.get(i).split(',')[0]), "node_id":int(
-            #     cache.get(i).split(',')[1]), "time":int(i)} for i in cache.keys('*')]
-            # print(data)
-        else:
-            return False
+        if not query_date or not query_date in date_format:
+            query_date = "24hours"
+
+        date_filter = {}
+        now = datetime.now()
+        start_time, end_time = map(lambda x: now - timedelta(days=x),
+            date_format[query_date])
+
+        print('start time: {0} end time: {1}'.format(start_time, end_time))
+        date_filter['date__lte'] = start_time
+        date_filter['date__gt'] = end_time
+        queryset = self.queryset.filter(**date_filter)
+        # print(queryset)
+        return queryset
+        # data = [{"total": float(cache.get(i).split(',')[0]), "node_id":int(
+        #     cache.get(i).split(',')[1]), "time":int(i)} for i in cache.keys('*')]
+        # print(data)
 
     def list(self, request, *args, **kwargs):
-
-        node_id = request.GET.get("node_id", None)
+        node_id = kwargs["node_id"]
         node_query, node_validator = self.node_id_validator(node_id)
         queryset = self.filter_queryset(self.get_queryset())
 
@@ -147,7 +139,7 @@ def upload_reading(request):
     archive_date = datetime.date.fromtimestamp(float(time))
 
     # 保存读数到该天的archive记录
-    archive_query = node.node.filter(date=archive_date)
+    archive_query = node.power_archive.filter(date=archive_date)
     archive = archive_query[0] if archive_query.exists(
     ) else NodePowerArchive(node=node, date=archive_date)
     power_list = archive.power_list()
