@@ -3,7 +3,7 @@
 echo "Remember to create the file szdiy/local_settings.py for the uwsgi server"
 echo "Usage: ./start_server.sh <python_home>"
 
-if [ $# -lt 0 ] 
+if [ $# -gt 0 ] 
 then
     export PYTHON_HOME=$1
 else
@@ -23,7 +23,7 @@ $PYTHON_HOME/bin/uwsgi \
     --http :12001 \
     --socket szdiy-duo.sock \
     --module szdiy.wsgi -H $PYTHON_HOME \
-#    --daemonize=dev.log
+    --daemonize=/var/log/uwsgi/szdiy-duo/dev.log
 
 
 
