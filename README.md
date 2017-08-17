@@ -11,7 +11,7 @@ This is the first and a Django imlementation of the server side for the SZDIY **
 import requests
 
 def get_token():
-    url = "http://10.1.1.138:8000/api-token-auth/"
+    url = "http://10.1.1.138:8000/duo/api-token-auth/"
     data = {
         "username": 'root',
         "password": "test1234",
