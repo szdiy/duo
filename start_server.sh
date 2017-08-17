@@ -17,13 +17,13 @@ echo "PYTHON_HOME=${PYTHON_HOME} PARAMETER=${1}"
 #uwsgi --http :12001 --module szdiy.wsgi
 
 # Uncomment below for unix socket
-uwsgi \
+$PYTHON_HOME/bin/uwsgi \
     --vacuum \
     --master --pidfile=.pid_duo \
     --http :12001 \
     --socket szdiy-duo.sock \
     --module szdiy.wsgi -H $PYTHON_HOME \
-    --daemonize=dev.log
+#    --daemonize=dev.log
 
 
 
