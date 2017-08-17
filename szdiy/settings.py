@@ -25,7 +25,7 @@ SECRET_KEY = '_i#f9t))#3-^9c$xl-s9ssbyp9n=62ex#&k+(#*q5yqms4v-sd'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.33.10', 'localhost']
 
 
 # Application definition
@@ -60,15 +60,17 @@ REST_FRAMEWORK = {
     ]
 }
 
-# In some circumstances the password you should use to connect redis is not URL-safe, in this case you can escape it or just use the convenience option in OPTIONS dict:
+# In some circumstances the password you should use to connect redis is
+# not URL-safe, in this case you can escape it or just use the convenience
+# option in OPTIONS dict:
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://10.211.55.12:6379/0",
+        "LOCATION": "redis://127.0.0.1:6379/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD":"ZuPEFJCwKxJ7nHG",
-            "IGNORE_EXCEPTIONS": True, 
+            "PASSWORD": "dr2613sdjxxYJAfwNHkUY6zXyul",
+            "IGNORE_EXCEPTIONS": True,
         }
     }
 }
