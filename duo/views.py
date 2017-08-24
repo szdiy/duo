@@ -67,7 +67,7 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
         date_filter = {}
         now = datetime.now()
         start_time, end_time = map(lambda x: now - timedelta(days=x),
-            date_format[query_date])
+                                   date_format[query_date])
 
         print('start time: {0} end time: {1}'.format(start_time, end_time))
         date_filter['date__lte'] = start_time
@@ -93,7 +93,13 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
                     # print(serializer.data)
                     return self.get_paginated_response(serializer.data)
                 serializer = self.get_serializer(queryset, many=True)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+
+                data = serializer.data
+                for i in data:
+                    i['archive_json'] = json.loads(
+                        i['archive_json'].replace('"', "").replace("'", '"'))
+
+                return Response(data, status=status.HTTP_200_OK)
                 # else:
                 # return Response({"msg": "invalid date format, please try again"},
                 # status=status.HTTP_404_NOT_FOUND)
