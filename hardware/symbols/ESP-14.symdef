@@ -1,0 +1,46 @@
+--vmode 
+--square
+
+[labels]
+ESP-14
+refdes=U?
+! copryright=2017 Atommann
+! author=Atommann <atommann@gmail.com>
+! uselicense=unlimited
+! distlicense=GPL
+! device=ESP-14 WiFi Module with STM8S003 inside
+! footprint=ESP-14-22P
+
+[left]
+
+1 M_PC5
+2 M_PC6
+3 M_PC7
+4 SWIM
+5 M_PD3
+6 M_PD4
+7 M_NRST
+8 GND
+
+[right]
+
+22 M_PC4
+21 M_PC3
+20 M_PB4
+19 M_PB5
+18 M_PA3
+17 E_VDD
+16 M_VDD
+15 M_VCAP
+
+[top]
+
+[bottom]
+
+9  M_PD2
+10 M_PD5
+11 M_PD6
+12 M_PA1
+13 M_PA2
+14 E_GPIO0
+

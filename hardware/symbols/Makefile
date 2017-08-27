@@ -10,3 +10,6 @@ esp:
 
 acdc:
 	./djboxsym LD03-10B05.symdef > LD03-10B05.sym
+
+esp14:
+	./djboxsym ESP-14.symdef > ESP-14.sym
