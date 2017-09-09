@@ -40,7 +40,7 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
             archive = archive_query[0] if archive_query.exists(
             ) else NodePowerArchive(node=node, date=archive_date)
             power_list = archive.power_list()
-            power_list.append(str({"total": total, "time": time}))
+            power_list.append({"total": total, "time": time})
             archive.to_power_list(power_list)
             archive.save()
             data = {"node": node_id, "archive_json": power_list}
@@ -93,13 +93,7 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
                     # print(serializer.data)
                     return self.get_paginated_response(serializer.data)
                 serializer = self.get_serializer(queryset, many=True)
-
-                data = serializer.data
-                for i in data:
-                    i['archive_json'] = json.loads(
-                        i['archive_json'].replace('"', "").replace("'", '"'))
-
-                return Response(data, status=status.HTTP_200_OK)
+                return Response(serializer.data, status=status.HTTP_200_OK)
                 # else:
                 # return Response({"msg": "invalid date format, please try again"},
                 # status=status.HTTP_404_NOT_FOUND)
