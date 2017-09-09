@@ -7,14 +7,14 @@ echo ""
 echo "Start server:"
 echo -e "$ ./start_server.sh <python_home>\n"
 
-if [ $# -eq 0 ] 
+if [ $# -gt 0 ] 
 then
-    export PYTHON_HOME=/home/terryoy/.venv/szdiy-duo
-else
     export PYTHON_HOME=$1
+else
+    export PYTHON_HOME=/home/terryoy/.venv/szdiy-duo
 fi
 
-echo "PYTHON_HOME=${PYTHON_HOME}"
+echo "PYTHON_HOME=${PYTHON_HOME} PARAMETER=${1}"
 
 
 # Uncomment below for port listening
@@ -27,7 +27,7 @@ $PYTHON_HOME/bin/uwsgi \
     --http :12001 \
     --socket szdiy-duo.sock \
     --module szdiy.wsgi -H $PYTHON_HOME \
-    --daemonize=dev.log && echo "uwsgi started"
+    --daemonize=/var/log/uwsgi/szdiy-duo/dev.log && echo "uwsgi started"
 
 
 

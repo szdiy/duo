@@ -1,5 +1,5 @@
 """
-WSGI config for szdiy project.
+WSGI config for kxyshop project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

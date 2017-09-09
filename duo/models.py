@@ -1,12 +1,7 @@
-from __future__ import unicode_literals   
+from __future__ import unicode_literals
 from django.db import models
 import json
 # Create your models here.
-
-class Device(models.Model):
-    node_id = models.IntegerField()
-    total = models.FloatField()
-    time = models.BigIntegerField()
 
 
 class Node(models.Model):
@@ -15,14 +10,17 @@ class Node(models.Model):
         ('WATER', 'Water'),
     )
     node_id = models.CharField(max_length=15)
-    node_type = models.CharField(max_length=20, choices=NODE_TYPE_CHOICES, default="POWER")
-    
+    node_type = models.CharField(
+        max_length=20, choices=NODE_TYPE_CHOICES, default="POWER")
+
     def __str__(self):
         return self.node_id
 
 
+# 电力的记录（如果节点有其他类型时可创建其他的记录模型
 class NodePowerArchive(models.Model):
-    node = models.ForeignKey(Node, related_name="power_archive")
+    node = models.ForeignKey(
+        Node, related_name='power_archive', on_delete=models.CASCADE)
     archive_json = models.TextField(default="[]")
     date = models.DateField(auto_now=False, auto_now_add=False)
 
