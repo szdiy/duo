@@ -165,6 +165,7 @@
 import Vue from 'vue'
 import VueHighcharts from 'vue-highcharts'
 import VueResource from 'vue-resource'
+import { API_HOST, DEFAULT_NODE } from '../constants'
 Vue.use(VueResource)
 Vue.use(VueHighcharts)
 
@@ -172,9 +173,9 @@ export default {
   name: 'index',
   data () {
     return {
-      url: 'http://192.168.33.10:8000/duo/device/',
+      url: API_HOST + '/duo/device/',
       period: '2months',
-      node_id: '7654321345',
+      node_id: DEFAULT_NODE,
       todayUsage: 0,
       lastdayUsage: 0,
       thisWeekUsage: 0,
