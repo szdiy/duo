@@ -1,7 +1,11 @@
 #!/bin/bash
 
 echo "Remember to create the file szdiy/local_settings.py for the uwsgi server"
-echo "Usage: ./start_server.sh <python_home>"
+echo "Create settings:"
+echo "$ ln -s szdiy/settings.py szdiy/local_settings.py"
+echo ""
+echo "Start server:"
+echo -e "$ ./start_server.sh <python_home>\n"
 
 if [ $# -gt 0 ] 
 then
@@ -23,7 +27,7 @@ $PYTHON_HOME/bin/uwsgi \
     --http :12001 \
     --socket szdiy-duo.sock \
     --module szdiy.wsgi -H $PYTHON_HOME \
-    --daemonize=/var/log/uwsgi/szdiy-duo/dev.log
+    --daemonize=/var/log/uwsgi/szdiy-duo/dev.log && echo "uwsgi started"
 
 
 
