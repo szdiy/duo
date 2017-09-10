@@ -29,3 +29,13 @@ class NodePowerArchive(models.Model):
 
     def to_power_list(self, power_list):
         self.archive_json = json.dumps(power_list)
+
+    def simple(self):
+        power = self.power_list()
+        if power:
+            return power[-1] # last reading at the day
+        else:
+            return None
+
+    def detail(self):
+        return self.power_list()
