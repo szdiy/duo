@@ -12,9 +12,16 @@ class NodeSerializer(serializers.ModelSerializer):
         # fields = ('node_id', 'node_type', 'power_archive')
 
 
-class NodePowerArchiveSerializer(serializers.ModelSerializer):
+class NodePowerArchiveSimpleSerializer(serializers.ModelSerializer):
     node_id = serializers.ReadOnlyField(source='node.node_id')
 
     class Meta:
         model = NodePowerArchive
-        fields = ('node_id', 'date', 'archive_json')
+        fields = ('node_id', 'date', 'simple') # last reading at the day
+
+class NodePowerArchiveDetailSerializer(serializers.ModelSerializer):
+    node_id = serializers.ReadOnlyField(source='node.node_id')
+
+    class Meta:
+        model = NodePowerArchive
+        fields = ('node_id', 'date', 'detail') # TODO: here the json string is parse and will be dumps again, enhance this!

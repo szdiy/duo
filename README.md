@@ -52,7 +52,9 @@ get_data(get_token())
 
 ### Get Device's Power Archive
 
- * Get power readings in last 24 hours ( Device: "A001" )
+There are two types of power data: **simple**(daily), **detail**(in every pulse).
+
+ * __[detail]__ Get power readings in last 24 hours ( Device: "A001" )
 
 ```python
 def get_data(token):
@@ -66,12 +68,12 @@ get_data(get_token())
 ```
 
  * Get power readings in other periods:
-   * "24hours", last 24 hours
-   * "48hours", last 48 hours,
-   * "7days", in last 7 days,
-   * "14days", in last 14 days,
-   * "1month", in last month,
-   * "3months", in last 3 months,
+   * __[detail]__ "24hours", last 24 hours
+   * __[detail]__ "48hours", last 48 hours,
+   * __[simple]__ "7days", in last 7 days,
+   * __[simple]__ "14days", in last 14 days,
+   * __[simple]__ "1month", in last month,
+   * __[simple]__ "3months", in last 3 months,
 
   Example: ( Device: "A001", period: "24hours")
 

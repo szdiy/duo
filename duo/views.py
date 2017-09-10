@@ -6,7 +6,7 @@ from rest_framework import status
 from django.core.cache import cache
 
 from .models import Node, NodePowerArchive
-from .serializers import NodeSerializer, NodePowerArchiveSerializer
+from .serializers import NodeSerializer, NodePowerArchiveSimpleSerializer, NodePowerArchiveDetailSerializer
 from .permissions import IsAdminOrReadOnly
 
 import json
@@ -25,7 +25,6 @@ class DeviceList(generics.ListCreateAPIView):
 
 class DevicePowerArchiveList(generics.ListCreateAPIView):
     queryset = NodePowerArchive.objects.all()  # descending by time
-    serializer_class = NodePowerArchiveSerializer
     permission_classes = (IsAdminOrReadOnly, )
 
     def create(self, request, *args, **kwargs):
@@ -48,15 +47,22 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
         else:
             return Response({"msg": "node_id not Found"}, status=status.HTTP_404_NOT_FOUND)
 
-    def get_queryset(self):
+    def get_serializer_class(self):
+        data_type = self.get_query_params()[2]
+        if data_type == 'detail':
+            return NodePowerArchiveDetailSerializer
+        else:
+            return NodePowerArchiveSimpleSerializer
+
+    def get_query_params(self):
 
         date_format = {
-            "24hours": [0, 1],
-            "48hours": [0, 2],
-            "7days": [0, 7],
-            "14days": [0, 14],
-            "1month": [0, 30],
-            "2months": [0, 60],
+            "24hours": (0, 1, 'detail'),
+            "48hours": (0, 2, 'detail'),
+            "7days": (0, 7, 'simple'),
+            "14days": (0, 14, 'simple'),
+            "1month": (0, 30, 'simple'),
+            "2months": (0, 60, 'simple'),
         }
 
         query_date = self.request.GET.get("period", None)
@@ -64,14 +70,15 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
         if not query_date or not query_date in date_format:
             query_date = "24hours"
 
+        return date_format[query_date]
+
+    def get_queryset(self):
+        start_time, end_time, data_type = self.get_query_params()
+        print('start time: {0} end time: {1} data type: {2}'.format(start_time, end_time, data_type))
         date_filter = {}
         now = datetime.now()
-        start_time, end_time = map(lambda x: now - timedelta(days=x),
-                                   date_format[query_date])
-
-        print('start time: {0} end time: {1}'.format(start_time, end_time))
-        date_filter['date__lte'] = start_time
-        date_filter['date__gt'] = end_time
+        date_filter['date__lte'] = now - timedelta(days=start_time)
+        date_filter['date__gt'] = now - timedelta(days=end_time)
         queryset = self.queryset.filter(**date_filter)
         # print(queryset)
         return queryset
@@ -82,7 +89,8 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
     def list(self, request, *args, **kwargs):
         node_id = kwargs["node_id"]
         node_query, node_validator = self.node_id_validator(node_id)
-        queryset = self.filter_queryset(self.get_queryset())
+        # queryset = self.filter_queryset(self.get_queryset()) # if not used with filter backend, this is not required
+        queryset = self.get_queryset()
 
         if queryset is not False:
             if node_validator:
@@ -93,6 +101,9 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
                     # print(serializer.data)
                     return self.get_paginated_response(serializer.data)
                 serializer = self.get_serializer(queryset, many=True)
+
+
+
                 return Response(serializer.data, status=status.HTTP_200_OK)
                 # else:
                 # return Response({"msg": "invalid date format, please try again"},
