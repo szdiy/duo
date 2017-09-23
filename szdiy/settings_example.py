@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'duo',
     'corsheaders',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [

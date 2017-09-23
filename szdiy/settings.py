@@ -1,1 +1,1 @@
-settings.py.example
+settings_example.py

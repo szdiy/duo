@@ -1,6 +1,9 @@
 Django==1.11.1
+django-cors-headers==2.1.0
+django-extensions==1.9.1
 django-redis==4.8.0
 djangorestframework==3.6.2
 pytz==2017.2
 redis==2.10.5
-django-cors-headers==2.1.0
+six==1.11.0
+#uWSGI==2.0.15
