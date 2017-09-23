@@ -24,7 +24,7 @@ class NodePowerArchive(models.Model):
     archive_json = models.TextField(default="[]")
     date = models.DateField(auto_now=False, auto_now_add=False)
     latest_total = models.FloatField(default=0)
-    latest_time = models.BigIntegerField(null=True, blank=True)
+    latest_time = models.DateTimeField(null=True, blank=True)
 
 
     def power_list(self):

@@ -11,7 +11,7 @@ from .permissions import IsAdminOrReadOnly
 
 import json
 from django.utils.timezone import datetime, timedelta
-from utils.datetime import seconds_to_date_field, seconds_to_micros
+from utils.datetime import seconds_to_date_field, seconds_to_datetime_field
 import logging
 
 # Create your views here.
@@ -60,12 +60,12 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
             # TODO: 排重/排序
             new_record = {
                 "total": float(total),
-                "time": seconds_to_micros(time),
+                "time": float(time),
                 }
             power_list.append(new_record)
-            if archive.latest_time < new_record['time']:
+            if archive.latest_time < seconds_to_datetime_field(new_record['time']):
                 archive.latest_total = new_record['total']
-                archive.latest_time = new_record['time']
+                archive.latest_time = seconds_to_datetime_field(new_record['time'])
 
             archive.to_power_list(power_list)
             archive.save()
@@ -185,12 +185,12 @@ def upload_reading(request):
     # TODO: 去重/排序
     new_record = {
         "total": float(total),
-        "time": seconds_to_micros(time),
+        "time": float(time),
         }
     power_list.append(new_record)
-    if archive.latest_time < new_record['time']:
+    if archive.latest_time < seconds_to_datetime_field(new_record['time']):
         archive.latest_total = new_record['total']
-        archive.latest_time = new_record['time']
+        archive.latest_time = seconds_to_datetime_field(new_record['time'])
 
     archive.to_power_list(power_list)
 

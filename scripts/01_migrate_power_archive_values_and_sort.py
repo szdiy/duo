@@ -1,5 +1,5 @@
 from duo.models import *
-from utils.datetime import seconds_to_micros
+from utils.datetime import seconds_to_datetime_field
 
 def run():
     for archive in NodePowerArchive.objects.all():
@@ -11,7 +11,7 @@ def run():
         for p in power_list:
             if isinstance(p['time'], str):
                 # used to save as float string(in seconds), now convert to integer(in microseconds)
-                p['time'] = int(seconds_to_micros(float(p['time'])))
+                p['time'] = float(p['time'])
             if isinstance(p['total'], str):
                 p['total'] = float(p['total'])
 
@@ -21,7 +21,7 @@ def run():
         # 设最后的时间
         latest = power_list[-1]
         archive.latest_total = latest['total']
-        archive.latest_time = latest['time']
+        archive.latest_time = seconds_to_datetime_field(latest['time'])
 
         # 保存
         archive.to_power_list(power_list)
