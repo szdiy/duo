@@ -5,5 +5,5 @@ from . import views
 urlpatterns = [
     url(r'^device$', views.DeviceList.as_view()),
     url(r'^device/(?P<node_id>\w+)/power$', views.DevicePowerArchiveList.as_view()),
-    url(r'^upload/$', views.upload_reading),
+    url(r'^upload$', views.upload_reading),
 ]

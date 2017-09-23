@@ -11,6 +11,7 @@ from .permissions import IsAdminOrReadOnly
 
 import json
 from django.utils.timezone import datetime, timedelta
+from utils.datetime import unix_timestamp_to_date_field
 import logging
 
 # Create your views here.
@@ -22,6 +23,19 @@ class DeviceList(generics.ListCreateAPIView):
     serializer_class = NodeSerializer
     permission_classes = (IsAdminOrReadOnly, )
 
+    def create(self, request, *args, **kwargs):
+        node_id = request.POST.get('node_id', None)
+        node_type = request.POST.get('node_type', '').upper()
+        if Node.objects.filter(node_id=node_id).exists():
+            return Response({ 'msg': 'node_id already exists'}, status=status.HTTP_409_CONFLICT)
+        if node_type not in [x[0] for x in Node.NODE_TYPE_CHOICES]:
+            print('node_type:{}'.format(node_type))
+            return Response({ 'msg': 'node_type does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+        node = Node(node_id=node_id, node_type=node_type)
+        serializer = self.get_serializer(node)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class DevicePowerArchiveList(generics.ListCreateAPIView):
     queryset = NodePowerArchive.objects.all()  # descending by time
@@ -33,7 +47,7 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
         if node_validator:
             time = request.POST.get("time", None)
             total = request.POST.get('total', None)
-            archive_date = datetime.date.fromtimestamp(float(time))
+            archive_date = unix_timestamp_to_date_field(time)
             node = node_query[0]
             archive_query = node.power_archive.filter(date=archive_date)
             archive = archive_query[0] if archive_query.exists(
@@ -147,7 +161,8 @@ def upload_reading(request):
         return HttpResponse("Node not found", status=404)
 
     node = node_query[0]
-    archive_date = datetime.date.fromtimestamp(float(time))
+    print('time:{0}'.format(float(time)))
+    archive_date = unix_timestamp_to_date_field(time)
 
     # 保存读数到该天的archive记录
     archive_query = node.power_archive.filter(date=archive_date)
