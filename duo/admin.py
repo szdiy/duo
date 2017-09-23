@@ -10,4 +10,4 @@ class NodeAdmin(admin.ModelAdmin):
 
 @admin.register(NodePowerArchive)
 class NodePowerArchiveAdmin(admin.ModelAdmin):
-    list_display = ['node', 'date', 'archive_json']
+    list_display = ['node', 'date', 'latest_time', 'latest_total', 'archive_json']

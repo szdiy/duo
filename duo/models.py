@@ -23,6 +23,9 @@ class NodePowerArchive(models.Model):
         Node, related_name='power_archive', on_delete=models.CASCADE)
     archive_json = models.TextField(default="[]")
     date = models.DateField(auto_now=False, auto_now_add=False)
+    latest_total = models.FloatField(default=0)
+    latest_time = models.DateTimeField(null=True, blank=True)
+
 
     def power_list(self):
         return json.loads(self.archive_json) if self.archive_json else []
@@ -31,9 +34,11 @@ class NodePowerArchive(models.Model):
         self.archive_json = json.dumps(power_list)
 
     def simple(self):
-        power = self.power_list()
-        if power:
-            return power[-1] # last reading at the day
+        if self.latest_time:
+            return {
+                "total": self.latest_total,
+                "time": self.latest_time,
+            }
         else:
             return None
 

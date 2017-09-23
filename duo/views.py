@@ -11,6 +11,7 @@ from .permissions import IsAdminOrReadOnly
 
 import json
 from django.utils.timezone import datetime, timedelta
+from utils.datetime import seconds_to_date_field, seconds_to_datetime_field
 import logging
 
 # Create your views here.
@@ -22,28 +23,54 @@ class DeviceList(generics.ListCreateAPIView):
     serializer_class = NodeSerializer
     permission_classes = (IsAdminOrReadOnly, )
 
+    def create(self, request, *args, **kwargs):
+        node_id = request.POST.get('node_id', None)
+        node_type = request.POST.get('node_type', '').upper()
+        if Node.objects.filter(node_id=node_id).exists():
+            return Response({ 'msg': 'node_id already exists'}, status=status.HTTP_409_CONFLICT)
+        if node_type not in [x[0] for x in Node.NODE_TYPE_CHOICES]:
+            print('node_type:{}'.format(node_type))
+            return Response({ 'msg': 'node_type does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+        node = Node(node_id=node_id, node_type=node_type)
+        serializer = self.get_serializer(node)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class DevicePowerArchiveList(generics.ListCreateAPIView):
     queryset = NodePowerArchive.objects.all()  # descending by time
     permission_classes = (IsAdminOrReadOnly, )
 
     def create(self, request, *args, **kwargs):
-        node_id = request.POST.get("node_id", None)
+        print('args:{0} kwargs:{1}'.format(args, kwargs))
+        # node_id = request.POST.get("node_id", None)
+        node_id = kwargs.get('node_id', None)
         node_query, node_validator = self.node_id_validator(node_id)
         if node_validator:
             time = request.POST.get("time", None)
             total = request.POST.get('total', None)
-            archive_date = datetime.date.fromtimestamp(float(time))
+            archive_date = seconds_to_date_field(time)
+
             node = node_query[0]
             archive_query = node.power_archive.filter(date=archive_date)
             archive = archive_query[0] if archive_query.exists(
             ) else NodePowerArchive(node=node, date=archive_date)
+
             power_list = archive.power_list()
-            power_list.append({"total": total, "time": time})
+            # TODO: 排重/排序
+            new_record = {
+                "total": float(total),
+                "time": float(time),
+                }
+            power_list.append(new_record)
+            if not archive.latest_time or archive.latest_time < seconds_to_datetime_field(new_record['time']):
+                archive.latest_total = new_record['total']
+                archive.latest_time = seconds_to_datetime_field(new_record['time'])
+
             archive.to_power_list(power_list)
             archive.save()
             data = {"node": node_id, "archive_json": power_list}
-            return Response(data, status=status.HTTP_201_CREATED)
+            return Response({ 'msg': 'ok' }, status=status.HTTP_201_CREATED)
         else:
             return Response({"msg": "node_id not Found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -147,14 +174,24 @@ def upload_reading(request):
         return HttpResponse("Node not found", status=404)
 
     node = node_query[0]
-    archive_date = datetime.date.fromtimestamp(float(time))
+    print('time:{0}'.format(float(time)))
+    archive_date = seconds_to_date_field(time)
 
     # 保存读数到该天的archive记录
     archive_query = node.power_archive.filter(date=archive_date)
     archive = archive_query[0] if archive_query.exists(
     ) else NodePowerArchive(node=node, date=archive_date)
     power_list = archive.power_list()
-    power_list.append({"total": total, "time": time})
+    # TODO: 去重/排序
+    new_record = {
+        "total": float(total),
+        "time": float(time),
+        }
+    power_list.append(new_record)
+    if not archive.latest_time  < seconds_to_datetime_field(new_record['time']):
+        archive.latest_total = new_record['total']
+        archive.latest_time = seconds_to_datetime_field(new_record['time'])
+
     archive.to_power_list(power_list)
 
     archive.save()

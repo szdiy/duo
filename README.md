@@ -11,7 +11,7 @@ This is the first and a Django imlementation of the server side for the SZDIY **
 import requests
 
 def get_token():
-    url = "http://10.1.1.138:8000/duo/api-token-auth/"
+    url = "http://api.szdiy.org/duo/api-token-auth"
     data = {
         "username": 'root',
         "password": "test1234",
@@ -20,54 +20,70 @@ def get_token():
     return r.json()['token']
 ```
 
-### Post data
+### Create Device
 ```python
-def Post_data(token):
-    url = "http://10.1.1.138:8000/duo/device"
+def create_device(token):
+    url = "http://api.szdiy.org/duo/device"
     data = {
-        "node_id": 7654321345,
-        "total": 4567890,
-        "time": 672384956,
+        "node_id": 'NODE1',
+        "node_type": 'POWER',
         }
     header = {"Authorization": "Token {}".format(token)}
     r = requests.post(url, data=data, headers=header)
     return r.content
 
-Post_data(get_token())
+create_device(get_token())
 
 ```
 
-### Get Device data
+### Get Device List
 
 ```python
-def get_data(token):
-    url = "http://10.1.1.138:8000/duo/device"
+def list_device():
+    url = "http://api.szdiy.org/duo/device"
     header = {"Authorization": "Token {}".format(token)}
     r = requests.get(url, headers=header)
     return r.json()
 
-get_data(get_token())
+list_device(get_token())
 
 ```
 
+### Upload Power readings
+
+```python
+
+def upload_power(token, node_id, total, time):
+    url = "http://api.szdiy.org/duo/device/{0}/power".format(node_id)
+    data = {
+        "node_id": 'NODE1',
+        "total": 4567890,
+        "time": 672384956,
+        }
+    header = {"Authorization": "Token {}".format(token)}
+    r = requests.get(url, headers=header)
+    return r.json()
+
+```
 ### Get Device's Power Archive
 
 There are two types of power data: **simple**(daily), **detail**(in every pulse).
 
- * __[detail]__ Get power readings in last 24 hours ( Device: "A001" )
+####  __[detail]__ Get power readings in last 24 hours
 
 ```python
-def get_data(token):
-    url = "http://10.1.1.138:8000/duo/device/A001/power"
+def latest_power(token, node_id):
+    url = "http://api.szdiy.org/duo/device/{0}/power".format(node_id)
     header = {"Authorization": "Token {}".format(token)}
     r = requests.get(url, headers=header)
     return r.json()
 
-get_data(get_token())
+latest_power(get_token(), 'NODE1')
 
 ```
 
- * Get power readings in other periods:
+#### Get power readings in other periods:
+
    * __[detail]__ "24hours", last 24 hours
    * __[detail]__ "48hours", last 48 hours,
    * __[simple]__ "7days", in last 7 days,
@@ -78,15 +94,17 @@ get_data(get_token())
   Example: ( Device: "A001", period: "24hours")
 
  ```python
- def get_data(token):
-     url = "http://10.1.1.138:8000/duo/device/A001/power?period=24hours"
+ def get_power_archive(token, node_id, period):
+     url = "http://api.szdiy.org/duo/device/{0}/power?period={1}".format(node_id, period)
      header = {"Authorization": "Token {}".format(token)}
      r = requests.get(url, headers=header)
      return r.json()
 
- get_data(get_token())
+ get_power_archive(get_token(), 'NODE1', '7days')
 
  ```
+
+#### __[detail]__ Get power archive by date
 
 
 ### Generate past 70 days data for testing

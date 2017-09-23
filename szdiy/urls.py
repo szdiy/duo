@@ -28,6 +28,6 @@ from rest_framework.authtoken.views import obtain_auth_token
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     url(r'^duo/admin/', admin.site.urls),
-    url(r'^duo/api-token-auth/', obtain_auth_token),
+    url(r'^duo/api-token-auth$', obtain_auth_token),
     url(r'^duo/', include('duo.url')),
 ]
