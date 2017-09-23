@@ -37,7 +37,7 @@ class NodePowerArchive(models.Model):
         if self.latest_time:
             return {
                 "total": self.latest_total,
-                "time": self.latest_time,
+                "time": self.latest_time.timestamp(),
             }
         else:
             return None
