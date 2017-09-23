@@ -63,7 +63,7 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
                 "time": float(time),
                 }
             power_list.append(new_record)
-            if archive.latest_time < seconds_to_datetime_field(new_record['time']):
+            if not archive.latest_time or archive.latest_time < seconds_to_datetime_field(new_record['time']):
                 archive.latest_total = new_record['total']
                 archive.latest_time = seconds_to_datetime_field(new_record['time'])
 
@@ -188,7 +188,7 @@ def upload_reading(request):
         "time": float(time),
         }
     power_list.append(new_record)
-    if archive.latest_time < seconds_to_datetime_field(new_record['time']):
+    if not archive.latest_time  < seconds_to_datetime_field(new_record['time']):
         archive.latest_total = new_record['total']
         archive.latest_time = seconds_to_datetime_field(new_record['time'])
 
