@@ -21,7 +21,6 @@
   	      <tr>
   	        <th>#</th>
   	        <th>Time</th>
-  	        <th>Arrived At</th>
   	        <th>Data Reported</th>
   	      </tr>
   	    </thead>
@@ -29,7 +28,6 @@
   	      <tr v-for="r of LastReports">
   	        <td>{{r.id}}</td>
   	        <td>{{r.time}}</td>
-  	        <td>{{r.arriveAt}}</td>
   	        <td>{{r.data}}</td>
   	      </tr>
   	    </tbody>
@@ -41,10 +39,10 @@
 <script>
 import Vue from 'vue'
 import VueHighcharts from 'vue-highcharts'
-import { getTodayUsage, getWeeksUsage, getLastDayUsage } from '../api/PowerArchiveAPI'
+import { get48Hours, get30Days, get90Days } from '../api/PowerArchiveAPI'
 import TodayUsage, { parseOverviewReport } from '../api/TodayUsage'
-import ChartOption, { parseChartReport } from '../api/TwoWeekCompare'
-import LastReports, { } from '../api/LastReports'
+import ChartOption, { parseChartReport } from '../api/ChartReport'
+import LastReports, { parseLastReports } from '../api/LastReports'
 
 Vue.use(VueHighcharts)
 
@@ -58,10 +56,16 @@ export default {
     }
   },
   created: function () {
-    return Promise.all([getTodayUsage, getLastDayUsage, getWeeksUsage])
-      .then((todayResponse, twoDaysResponse, getWeeksUsage) => {
+    return Promise.all([get48Hours(), get30Days(), get90Days()])
+      .then(([twoDaysResponse, monthResponse, threeMonthResponse]) => {
         // update report data here...
+        this.LastReports = parseLastReports(twoDaysResponse)
 
+        const chartSeries = parseChartReport(monthResponse)
+        this.ChartOption.xAxis.categories = chartSeries.dateSeries
+        this.ChartOption.series[0].data = chartSeries.dataSeries
+
+        return
       })
   }
 }

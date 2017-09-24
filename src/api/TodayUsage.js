@@ -18,6 +18,9 @@ export default [{
 }]
 
 /*
+  Required API request:
+    ?preiod=2months
+
   Return a report of summary:
   // ...
  */
