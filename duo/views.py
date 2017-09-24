@@ -100,6 +100,10 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
         return date_format[query_date]
 
     def get_queryset(self):
+        if self.request.GET.get('date', None):
+            date =
+
+    def get_period_query(self):
         start_time, end_time, data_type = self.get_query_params()
         print('start time: {0} end time: {1} data type: {2}'.format(start_time, end_time, data_type))
         date_filter = {}
@@ -112,6 +116,9 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
         # data = [{"total": float(cache.get(i).split(',')[0]), "node_id":int(
         #     cache.get(i).split(',')[1]), "time":int(i)} for i in cache.keys('*')]
         # print(data)
+
+    def get_date_query(self):
+
 
     def list(self, request, *args, **kwargs):
         node_id = kwargs["node_id"]
@@ -188,7 +195,7 @@ def upload_reading(request):
         "time": float(time),
         }
     power_list.append(new_record)
-    if not archive.latest_time  < seconds_to_datetime_field(new_record['time']):
+    if not archive.latest_time or archive.latest_time < seconds_to_datetime_field(new_record['time']):
         archive.latest_total = new_record['total']
         archive.latest_time = seconds_to_datetime_field(new_record['time'])
 
