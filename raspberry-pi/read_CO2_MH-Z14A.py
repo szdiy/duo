@@ -117,7 +117,7 @@ if __name__ == '__main__':
         web_url = "https://api.szdiy.org/duo/upload?node=002&co2_ppm=" + str(status["ppm"]) + "&time=" + str(time_stamp)
         print web_url
         #"""
-        c = httplib.HTTPSConnection("szdiy.org")
+        c = httplib.HTTPSConnection("api.szdiy.org")
         c.request("GET", web_url)
         response = c.getresponse()
         print response.status, response.reason
