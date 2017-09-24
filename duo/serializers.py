@@ -24,4 +24,4 @@ class NodePowerArchiveDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NodePowerArchive
-        fields = ('node_id', 'date', 'detail') # TODO: here the json string is parse and will be dumps again, enhance this!
+        fields = ('node_id', 'date', 'latest_total', 'latest_timestamp', 'detail') # TODO: here the json string is parse and will be dumps again, enhance this!

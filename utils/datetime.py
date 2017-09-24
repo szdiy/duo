@@ -12,3 +12,6 @@ def seconds_to_datetime_field(timestamp_str):
 def seconds_to_date_field(timestamp_str):
     dt = seconds_to_datetime_field(timestamp_str)
     return dt.date()
+
+def datetime_field_to_seconds(dt):
+    return dt.timestamp()

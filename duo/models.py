@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 from django.db import models
+from utils.datetime import datetime_field_to_seconds
 import json
 # Create your models here.
 
@@ -37,10 +38,13 @@ class NodePowerArchive(models.Model):
         if self.latest_time:
             return {
                 "total": self.latest_total,
-                "time": self.latest_time.timestamp(),
+                "time": self.latest_timestamp(),
             }
         else:
             return None
 
     def detail(self):
         return self.power_list()
+
+    def latest_timestamp(self):
+        return datetime_field_to_seconds(self.latest_time) if self.latest_time else 0

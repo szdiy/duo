@@ -106,6 +106,16 @@ latest_power(get_token(), 'NODE1')
 
 #### __[detail]__ Get power archive by date
 
+```python
+def get_power_archive_by_date(token, node_id, date):
+    url = "http://api.szdiy.org/duo/device/{0}/power?date={1}".format(node_id, date)
+    header = {"Authorization": "Token {}".format(token)}
+    r = requests.get(url, headers=header)
+    return r.json()
+
+get_power_archive_by_date(get_token(), 'NODE1', '2017-09-24') # date format "YYYY-MM-dd"
+
+```
 
 ### Generate past 70 days data for testing
 
