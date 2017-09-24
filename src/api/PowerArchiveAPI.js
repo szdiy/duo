@@ -1,14 +1,16 @@
 import Vue from 'vue'
 import VueResource from 'vue-resource'
 import { API_HOST, DEFAULT_NODE } from '../constants'
+import $ from 'jquery'
 Vue.use(VueResource)
 
 const Period = {
   LAST_24HOURS: '24hours',
-  LAST_DAY: '48hours',
-  LAST_WEEK: '7days',
-  LAST_MONTH: '1month',
-  TWO_MONTHS: '2months'
+  LAST_48HOURS: '48hours',
+  LAST_7DAYS: '7days',
+  LAST_30DAYS: '1month',
+  LAST_60DAYS: '2months',
+  LAST_90DAYS: '3months'
 }
 
 const baseOptions = {
@@ -20,27 +22,31 @@ const baseOptions = {
 // TODO: add nodeId as parameter
 export function getPowerArchive (period) {
   const { url, nodeId } = baseOptions
-  return this.$http.get(url + nodeId + '/power?period=' + (period || baseOptions.period))
+  return $.get(url + nodeId + '/power?period=' + (period || baseOptions.period))
 }
 
-export function getTodayUsage () {
+export function get24Hours () {
   return getPowerArchive(Period.LAST_24HOURS)
 }
 
-export function getLastDayUsage () {
-  return getPowerArchive(Period.LAST_DAY)
+export function get48Hours () {
+  return getPowerArchive(Period.LAST_48HOURS)
 }
 
-export function getThisWeekUsage () {
-  return getPowerArchive(Period.LAST_WEEK)
+export function get7Days () {
+  return getPowerArchive(Period.LAST_7DAYS)
 }
 
-export function getThisMonthUsage () {
-  return getPowerArchive(Period.LAST_MONTH)
+export function get30Days () {
+  return getPowerArchive(Period.LAST_30DAYS)
 }
 
-export function getWeeksUsage () {
-  return getPowerArchive(Period.TWO_MONTHS)
+export function get60Days () {
+  return getPowerArchive(Period.LAST_60DAYS)
+}
+
+export function get90Days () {
+  return getPowerArchive(Period.LAST_90DAYS)
 }
 
 //
