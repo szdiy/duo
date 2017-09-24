@@ -41,6 +41,14 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
     queryset = NodePowerArchive.objects.all()  # descending by time
     permission_classes = (IsAdminOrReadOnly, )
 
+    def get_serializer_class(self):
+        data_type = self.get_period_query_params()[2]
+        if self.is_date_query() or data_type == 'detail':
+            return NodePowerArchiveDetailSerializer
+        else:
+            return NodePowerArchiveSimpleSerializer
+
+
     def create(self, request, *args, **kwargs):
         print('args:{0} kwargs:{1}'.format(args, kwargs))
         # node_id = request.POST.get("node_id", None)
@@ -74,82 +82,22 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
         else:
             return Response({"msg": "node_id not Found"}, status=status.HTTP_404_NOT_FOUND)
 
-    def get_serializer_class(self):
-        data_type = self.get_query_params()[2]
-        if data_type == 'detail':
-            return NodePowerArchiveDetailSerializer
-        else:
-            return NodePowerArchiveSimpleSerializer
-
-    def get_query_params(self):
-
-        date_format = {
-            "24hours": (0, 1, 'detail'),
-            "48hours": (0, 2, 'detail'),
-            "7days": (0, 7, 'simple'),
-            "14days": (0, 14, 'simple'),
-            "1month": (0, 30, 'simple'),
-            "2months": (0, 60, 'simple'),
-        }
-
-        query_date = self.request.GET.get("period", None)
-
-        if not query_date or not query_date in date_format:
-            query_date = "24hours"
-
-        return date_format[query_date]
-
-    def get_queryset(self):
-        if self.request.GET.get('date', None):
-            date =
-
-    def get_period_query(self):
-        start_time, end_time, data_type = self.get_query_params()
-        print('start time: {0} end time: {1} data type: {2}'.format(start_time, end_time, data_type))
-        date_filter = {}
-        now = datetime.now()
-        date_filter['date__lte'] = now - timedelta(days=start_time)
-        date_filter['date__gt'] = now - timedelta(days=end_time)
-        queryset = self.queryset.filter(**date_filter)
-        # print(queryset)
-        return queryset
-        # data = [{"total": float(cache.get(i).split(',')[0]), "node_id":int(
-        #     cache.get(i).split(',')[1]), "time":int(i)} for i in cache.keys('*')]
-        # print(data)
-
-    def get_date_query(self):
-
 
     def list(self, request, *args, **kwargs):
         node_id = kwargs["node_id"]
         node_query, node_validator = self.node_id_validator(node_id)
-        # queryset = self.filter_queryset(self.get_queryset()) # if not used with filter backend, this is not required
-        queryset = self.get_queryset()
 
-        if queryset is not False:
-            if node_validator:
-                print("node_validator")
-                page = self.paginate_queryset(queryset)
-                if page is not None:
-                    serializer = self.get_serializer(page, many=True)
-                    # print(serializer.data)
-                    return self.get_paginated_response(serializer.data)
-                serializer = self.get_serializer(queryset, many=True)
+        if not node_validator:
+            return Response({"msg": "node_id not Found"}, status=status.HTTP_404_NOT_FOUND)
 
-
-
-                return Response(serializer.data, status=status.HTTP_200_OK)
-                # else:
-                # return Response({"msg": "invalid date format, please try again"},
-                # status=status.HTTP_404_NOT_FOUND)
-            else:
-                return Response({"msg": "node_id not Found"}, status=status.HTTP_404_NOT_FOUND)
+        if self.is_date_query():
+            return self.get_date_query_result()
         else:
-            return Response({"msg": "dateformat error, please trye again"}, status=status.HTTP_404_NOT_FOUND)
+            return self.get_period_query_result()
+
 
     def node_id_validator(self, node_id):
         queryset = Node.objects.all()
-        print(node_id)
         if node_id:
             queryset = queryset.filter(node_id=node_id)
             if queryset.exists():
@@ -158,6 +106,66 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
                 return queryset, False
 
         return False, False
+
+    def is_date_query(self):
+        return self.request.GET.get('date', None)
+
+
+    def get_date_query_result(self):
+        request_date = self.request.GET.get('date', None)
+        try:
+            date = datetime.strptime(request_date, '%Y-%m-%d')
+        except:
+            return Response({ 'msg': 'date format incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+
+        node_query = NodePowerArchive.objects.filter(date=date)
+        if node_query.exists():
+            serializer = self.get_serializer(node_query[0])
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({ 'msg': 'no record for this date'}, status=status.HTTP_404_NOT_FOUND)
+
+
+    def get_period_query_result(self):
+        queryset = self.get_period_queryset()
+
+        if queryset is not False:
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                # print(serializer.data)
+                return self.get_paginated_response(serializer.data)
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"msg": "dateformat error, please trye again"}, status=status.HTTP_404_NOT_FOUND)
+
+    def get_period_query_params(self):
+        date_format = {
+            "24hours": (0, 1, 'detail'),
+            "48hours": (0, 2, 'detail'),
+            "7days": (0, 7, 'simple'),
+            "14days": (0, 14, 'simple'),
+            "1month": (0, 30, 'simple'),
+            "2months": (0, 60, 'simple'),
+        }
+        query_date = self.request.GET.get("period", None)
+        if not query_date or not query_date in date_format:
+            query_date = "24hours"
+        return date_format[query_date]
+
+    def get_period_queryset(self):
+        start_time, end_time, data_type = self.get_period_query_params()
+        print('start time: {0} end time: {1} data type: {2}'.format(start_time, end_time, data_type))
+        date_filter = {}
+        now = datetime.now()
+        date_filter['date__lte'] = now - timedelta(days=start_time)
+        date_filter['date__gt'] = now - timedelta(days=end_time)
+        queryset = self.queryset.filter(**date_filter)
+        return queryset
+
+    def get_queryset(self):
+        return self.get_period_queryset()
 
 
 def upload_reading(request):
