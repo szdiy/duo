@@ -148,6 +148,7 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
             "14days": (0, 14, 'simple'),
             "1month": (0, 30, 'simple'),
             "2months": (0, 60, 'simple'),
+            "3months": (0, 90, 'simple'),
         }
         query_date = self.request.GET.get("period", None)
         if not query_date or not query_date in date_format:
@@ -161,7 +162,7 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
         now = datetime.now()
         date_filter['date__lte'] = now - timedelta(days=start_time)
         date_filter['date__gt'] = now - timedelta(days=end_time)
-        queryset = self.queryset.filter(**date_filter)
+        queryset = self.queryset.filter(**date_filter).order_by('date')
         return queryset
 
     def get_queryset(self):
