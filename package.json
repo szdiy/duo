@@ -8,6 +8,7 @@
     "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",
     "build": "node build/build.js",
+    "deploy": "node build/build.js && echo 'Deploying to remote server(api.szdiy.org)...' && read -p 'Login username:' USERNM && scp -r dist/* $USERNM@api.szdiy.org:/srv/www/szdiy-duo-frontend",
     "test": "npm run unit",
     "lint": "eslint --ext .js,.vue src test/unit/specs"
   },
