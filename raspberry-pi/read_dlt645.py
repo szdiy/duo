@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/local/bin/python2.7
 
 #---------------------------------------------------------------------------------------------
 # read_dlt645 v01 -- a tool to test dlt645 meter through IR reader
@@ -24,6 +24,7 @@
 import serial
 import sys,time
 import httplib
+import urllib
 
 SERIAL_TIMEOUT_CNT = 10
 #-------------------------
@@ -377,11 +378,24 @@ if __name__ == '__main__':
     # The API format
     #https://api.szdiy.org/duo/upload?node=<node_id>&total=&time=
 
+    #curl -X POST -H "Authorization: Token xxx" -d 'total=5120.38&time=1506602753.0' "https://api.szdiy.org/duo/device/001/power"
+ 
     #web_url = "https://api.szdiy.org/duo/";
-    web_url = "https://api.szdiy.org/duo/upload?node=001&total=" + str(total_kwh) + "&time=" + str(time_stamp)
+    #web_url = "https://api.szdiy.org/duo/upload?node=001&"
+
+    token = "" # put your token here
+    headers = {"Content-type": "application/x-www-form-urlencoded", "Authorization": "Token {}".format(token)}
+    web_url = "https://api.szdiy.org/duo/device/001/power"
+    #params = "total=" + str(total_kwh) + "&time=" + str(time_stamp)
+    params = urllib.urlencode({'total': total_kwh, 'time': time_stamp})
+
+    print params
+
+    # + str(total_kwh) + "&time=" + str(time_stamp)
     print web_url
-    c = httplib.HTTPSConnection("szdiy.org")
-    c.request("GET", web_url)
+    c = httplib.HTTPSConnection("api.szdiy.org")
+    #c.request("GET", web_url)
+    c.request("POST", web_url, params, headers)
     response = c.getresponse()
     print response.status, response.reason
     data = response.read()
