@@ -7,7 +7,7 @@ from django.core.cache import cache
 
 from .models import Node, NodePowerArchive
 from .serializers import NodeSerializer, NodePowerArchiveSimpleSerializer, NodePowerArchiveDetailSerializer
-from .permissions import IsAdminOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsAuthenticatedOrReadOnly
 
 import json
 from django.utils.timezone import datetime, timedelta
@@ -39,7 +39,7 @@ class DeviceList(generics.ListCreateAPIView):
 
 class DevicePowerArchiveList(generics.ListCreateAPIView):
     queryset = NodePowerArchive.objects.all()  # descending by time
-    permission_classes = (IsAdminOrReadOnly, )
+    permission_classes = (IsAuthenticatedOrReadOnly, )
 
     def get_serializer_class(self):
         data_type = self.get_period_query_params()[2]
