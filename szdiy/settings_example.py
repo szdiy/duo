@@ -25,7 +25,7 @@ SECRET_KEY = '_i#f9t))#3-^9c$xl-s9ssbyp9n=62ex#&k+(#*q5yqms4v-sd'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.10.117', 'localhost']
+ALLOWED_HOSTS = ['192.168.10.117', 'localhost', 'djangoapp']
 
 
 # Application definition
@@ -75,10 +75,12 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "PASSWORD": "dr2613sdjxxYJAfwNHkUY6zXyul",
             "IGNORE_EXCEPTIONS": True,
-        }
+        },
+        "KEY_PREFIX": "szdiy_duo"
     }
 }
 
+CACHE_TTL = 60 * 60
 
 ROOT_URLCONF = 'szdiy.urls'
 
@@ -152,7 +154,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = "media/"
 
 
-CORS_ORIGIN_ALLOW_ALL = True # do not use this in production
+CORS_ORIGIN_ALLOW_ALL = True  # do not use this in production
 # CORS_ORIGIN_WHITELIST = (
 #     'localhost:8080',
 #     'szdiy.org'
