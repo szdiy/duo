@@ -3,7 +3,6 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from django.core.cache import cache
 
 from .models import Node, NodePowerArchive
 from .serializers import NodeSerializer, NodePowerArchiveSimpleSerializer, NodePowerArchiveDetailSerializer
@@ -27,15 +26,16 @@ class DeviceList(generics.ListCreateAPIView):
         node_id = request.POST.get('node_id', None)
         node_type = request.POST.get('node_type', '').upper()
         if Node.objects.filter(node_id=node_id).exists():
-            return Response({ 'msg': 'node_id already exists'}, status=status.HTTP_409_CONFLICT)
+            return Response({'msg': 'node_id already exists'}, status=status.HTTP_409_CONFLICT)
         if node_type not in [x[0] for x in Node.NODE_TYPE_CHOICES]:
             print('node_type:{}'.format(node_type))
-            return Response({ 'msg': 'node_type does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'msg': 'node_type does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
         node = Node(node_id=node_id, node_type=node_type)
         serializer = self.get_serializer(node)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class DevicePowerArchiveList(generics.ListCreateAPIView):
     queryset = NodePowerArchive.objects.all()  # descending by time
@@ -47,7 +47,6 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
             return NodePowerArchiveDetailSerializer
         else:
             return NodePowerArchiveSimpleSerializer
-
 
     def create(self, request, *args, **kwargs):
         print('args:{0} kwargs:{1}'.format(args, kwargs))
@@ -69,19 +68,19 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
             new_record = {
                 "total": float(total),
                 "time": float(time),
-                }
+            }
             power_list.append(new_record)
             if not archive.latest_time or archive.latest_time < seconds_to_datetime_field(new_record['time']):
                 archive.latest_total = new_record['total']
-                archive.latest_time = seconds_to_datetime_field(new_record['time'])
+                archive.latest_time = seconds_to_datetime_field(new_record[
+                                                                'time'])
 
             archive.to_power_list(power_list)
             archive.save()
             data = {"node": node_id, "archive_json": power_list}
-            return Response({ 'msg': 'ok' }, status=status.HTTP_201_CREATED)
+            return Response({'msg': 'ok'}, status=status.HTTP_201_CREATED)
         else:
             return Response({"msg": "node_id not Found"}, status=status.HTTP_404_NOT_FOUND)
-
 
     def list(self, request, *args, **kwargs):
         node_id = kwargs["node_id"]
@@ -94,7 +93,6 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
             return self.get_date_query_result()
         else:
             return self.get_period_query_result()
-
 
     def node_id_validator(self, node_id):
         queryset = Node.objects.all()
@@ -110,21 +108,19 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
     def is_date_query(self):
         return self.request.GET.get('date', None)
 
-
     def get_date_query_result(self):
         request_date = self.request.GET.get('date', None)
         try:
             date = datetime.strptime(request_date, '%Y-%m-%d')
         except:
-            return Response({ 'msg': 'date format incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'msg': 'date format incorrect'}, status=status.HTTP_400_BAD_REQUEST)
 
         node_query = NodePowerArchive.objects.filter(date=date)
         if node_query.exists():
             serializer = self.get_serializer(node_query[0])
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response({ 'msg': 'no record for this date'}, status=status.HTTP_404_NOT_FOUND)
-
+            return Response({'msg': 'no record for this date'}, status=status.HTTP_404_NOT_FOUND)
 
     def get_period_query_result(self):
         queryset = self.get_period_queryset()
@@ -157,7 +153,8 @@ class DevicePowerArchiveList(generics.ListCreateAPIView):
 
     def get_period_queryset(self):
         start_time, end_time, data_type = self.get_period_query_params()
-        print('start time: {0} end time: {1} data type: {2}'.format(start_time, end_time, data_type))
+        print('start time: {0} end time: {1} data type: {2}'.format(
+            start_time, end_time, data_type))
         date_filter = {}
         now = datetime.now()
         date_filter['date__lte'] = now - timedelta(days=start_time)
@@ -202,7 +199,7 @@ def upload_reading(request):
     new_record = {
         "total": float(total),
         "time": float(time),
-        }
+    }
     power_list.append(new_record)
     if not archive.latest_time or archive.latest_time < seconds_to_datetime_field(new_record['time']):
         archive.latest_total = new_record['total']
