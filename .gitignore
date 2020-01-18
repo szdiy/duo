@@ -9,3 +9,5 @@
 #*.sch#
 *.sym~
 *.sch~
+# Racket
+*.rkt~

@@ -1,4 +1,4 @@
-#!/usr/local/bin/python2.7
+#!/usr/bin/python
 
 #---------------------------------------------------------------------------------------------
 # read_dlt645 v01 -- a tool to test dlt645 meter through IR reader

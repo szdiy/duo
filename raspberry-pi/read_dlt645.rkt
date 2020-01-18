@@ -90,6 +90,10 @@
 
 (define prefix-fe (make-bytes 4 #xfe))
 
+;; send this command to the meter
+;; it will send the address back
+(define read-addr-cmd (bytes #x68 #xaa #xaa #xaa #xaa #xaa #xaa #x68 #x13 #x00 #xdf #x16)
+
 ;-------------------------
 ; dlt645-get-addr
 ;-------------------------
@@ -101,6 +105,8 @@
 ;-------------------------    
 (define dlt645-read-data(serial addr data-tag)
   (display "pass"))
+
+;(open-serial-port "/dev/ttyUSB0" #:baudrate 2400 #:bits 8 #:parity 'even)
 
 ;-------------------------
 ; dlt645-read-time
@@ -122,4 +128,20 @@
  
 ; Make a POST to https://api.szdiy.org/duo/upload?node=001
 (define response (post api-szdiy-org "/" #:params params))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;        RUN
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; List serial ports (sanity check)
+(for ((serial-port (in-serial-ports)))
+  (printf "found ~a\n" serial-port))
+
+; Connect to serial port
+(define-values (in out)
+  (open-serial-port "/dev/ttyUSB0" #:baudrate 2400 #:bits 8 #:parity 'even))
+
+
+
+
 
