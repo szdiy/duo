@@ -26,9 +26,10 @@
 
 ;; If we send the following seq. to meter
 ;; it will send back the total kWH value:
+;; #x0A = \n
 ;; 68 95 04 13 00 00 00 68 11 04 34 33 34 33 5F 16
 
-(define cmd-read-total (bytes #x68 #x95 #x04 #x13 #x00 #x00 #x00 #x68 #x11 #x04 #x34 #x33 #x34 #x33 #x5F #x16))
+(define cmd-read-total (bytes #x68 #x95 #x04 #x13 #x00 #x00 #x00 #x68 #x11 #x04 #x34 #x33 #x34 #x33 #x5F #x16 #x0A))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;        CONSTANTS
@@ -45,9 +46,18 @@
 ;(for ((serial-port (in-serial-ports)))
 ;  (printf "found ~a\n" serial-port))
 
+; serial port parameters
+(define baudrate 2400)
+(define parity 'even)
+
 ; Connect to serial port
 (define-values (in out)
-  (serial-open "/dev/ttyUSB0" #:baudrate 2400 #:bytesize 8 #:parity 'even #:stopbits 'one))
+  (open-serial-port
+    "/dev/ttyUSB0"
+    #:baudrate 2400
+    #:bits 8
+    #:parity 'even
+    #:stopbits 1))
 
 (display cmd-read-total)
 (write-bytes cmd-read-total out)

@@ -23,6 +23,9 @@
 (require libserialport)
 (require simple-http)
 
+;; sleep time, in seconds
+(define sleep-time 60)
+
 ; the address of the meter in SZDIY hackspace
 (define meter-addr (bytes #x95 #x04 #x13 #x00 #x00 #x00))
 
@@ -130,6 +133,41 @@
 (define response (post api-szdiy-org "/" #:params params))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;        Application Specific Procedures
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; just a place holder
+(define (send-command)
+  (display "Sent\n"))
+
+;; just a place holder
+(define (delay-for-a-while)
+  (display "Delayed\n"))
+
+;; just a place holder
+(define (receive-result)
+  (display "Got data!\n"))
+
+;; just a place holder
+(define (post)
+  (display "Post done!\n"))
+
+(define (read)
+  (send-command)
+  (delay-for-a-while)
+  (receive-result))
+
+;; read  <-+
+;; post    |
+;; sleep --+
+(define (forever)
+  (read)
+  (post)
+  (sleep sleep-time)
+  (forever))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;        RUN
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -141,7 +179,5 @@
 (define-values (in out)
   (open-serial-port "/dev/ttyUSB0" #:baudrate 2400 #:bits 8 #:parity 'even))
 
-
-
-
-
+;; fire
+(forever)
