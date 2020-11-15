@@ -3,7 +3,8 @@
     <h1 class="page-header">Dashboard</h1>
   	<div class="row placeholders">
   	  <div class="col-xs-6 col-sm-3 placeholder" v-for="tu of TodayUsage">
-  	    <img :src="tu.img" width="200" height="200" class="img-responsive" :alt="tu.title">
+  	    <!-- <img :src="tu.img" width="200" height="200" class="img-responsive" :alt="tu.title"> -->
+        <h1>{{tu.total}}</h1>
   	    <h4>{{tu.title}}</h4>
   	    <span class="text-muted">{{tu.sub}}</span>
   	  </div>
@@ -59,6 +60,7 @@ export default {
     return Promise.all([get48Hours(), get30Days(), get90Days()])
       .then(([twoDaysResponse, monthResponse, threeMonthResponse]) => {
         // update report data here...
+        this.TodayUsage = parseOverviewReport(threeMonthResponse)
         this.LastReports = parseLastReports(twoDaysResponse)
 
         const chartSeries = parseChartReport(monthResponse)
